@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>securitytaters - 0xshrimantyogi</title><link href="/" rel="alternate"></link><link href="/feeds/0xshrimantyogi.atom.xml" rel="self"></link><id>/</id><updated>2020-07-22T16:59:00+05:30</updated><entry><title>Solving Cascade from csictf CTF 2020</title><link href="/solving-cascade-from-csictf-ctf-2020.html" rel="alternate"></link><published>2020-07-22T16:59:00+05:30</published><updated>2020-07-22T16:59:00+05:30</updated><author><name>0xshrimantyogi</name></author><id>tag:None,2020-07-22:/solving-cascade-from-csictf-ctf-2020.html</id><summary type="html">&lt;p&gt;Source code enumeration to capture the flag.&lt;/p&gt;</summary><content type="html">&lt;p&gt;This was an introductory challenge. I was presented with the following web page which was located at following &lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c"&gt;http://chall.csivit.com:30203/&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;&lt;img alt="page" src="img/14.1.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;The first thing we can do is to check the source code of the page to see if there are any hidden keys or information lurking around. This 
+can be easily done by right clicking on the page and selecting View Page Source options in FireFox browser.&lt;/p&gt;
+&lt;p&gt;Source code for the page contained following data.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="code" src="img/14.2.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;CSS files are usually of not much importance but this time around I checked for &lt;strong&gt;"/static/style.css"&lt;/strong&gt;. Upon clicking on that page I was directed to the
+content of CSS file which in turned gave me the Flag.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="flag" src="img/14.3.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;Thanks for reading!!&lt;/p&gt;</content><category term="CTF"></category><category term="webappsec"></category><category term="Source code enumeration"></category><category term="writeup"></category></entry><entry><title>Solving Oreo from csictf CTF 2020</title><link href="/solving-oreo-from-csictf-ctf-2020.html" rel="alternate"></link><published>2020-07-22T16:55:00+05:30</published><updated>2020-07-22T16:55:00+05:30</updated><author><name>0xshrimantyogi</name></author><id>tag:None,2020-07-22:/solving-oreo-from-csictf-ctf-2020.html</id><summary type="html">&lt;p&gt;Cookie manipulation attack to retrieve flag.&lt;/p&gt;</summary><content type="html">&lt;p&gt;The Oreo challenge from csictf CTF 2020 had following note and web address.&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;My&lt;/span&gt; &lt;span class="n"&gt;nephew&lt;/span&gt; &lt;span class="k"&gt;is&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;fussy&lt;/span&gt; &lt;span class="n"&gt;eater&lt;/span&gt; &lt;span class="k"&gt;and&lt;/span&gt; &lt;span class="k"&gt;is&lt;/span&gt; &lt;span class="k"&gt;only&lt;/span&gt; &lt;span class="n"&gt;willing&lt;/span&gt; &lt;span class="k"&gt;to&lt;/span&gt; &lt;span class="n"&gt;eat&lt;/span&gt; &lt;span class="n"&gt;chocolate&lt;/span&gt; &lt;span class="n"&gt;oreo&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt; &lt;span class="k"&gt;Any&lt;/span&gt; &lt;span class="n"&gt;other&lt;/span&gt; &lt;span class="n"&gt;flavor&lt;/span&gt; &lt;span class="k"&gt;and&lt;/span&gt; &lt;span class="n"&gt;he&lt;/span&gt; &lt;span class="n"&gt;throws&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;tantrum&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+
+&lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;chall&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;csivit&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;30243&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;The challenge page had following text displayed on the main page.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="main" src="img/13.1.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;As usual the first stop for these kind of CTFs are to &lt;strong&gt;check source code&lt;/strong&gt; and to see if there is any juicy information. In this case there wasn't any hence I decided to check request and response from the application. I started intercepting request via burp suite and noticed one strange cookie named &lt;strong&gt;flavor&lt;/strong&gt; which is being sent to the server.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="cookie" src="img/13.2.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;The value assigned to this cookie was base64 encoded &lt;strong&gt;c3RyYXdiZXJyeQ%3D%3D&lt;/strong&gt;. I decoded this value and it gave &lt;strong&gt;strawberreQ&lt;/strong&gt;. Since author's nephew likes chocolate, I decided to encode the word &lt;strong&gt;chocolate&lt;/strong&gt; using base64 encoding and append that value in flavor cookie and forward the request. Upon doing so I was presented with the flag and thus the challenge was completed. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="flag" src="img/13.3.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;Thanks for reading!!!&lt;/p&gt;</content><category term="CTF"></category><category term="webappsec"></category><category term="Cookie Manipulation"></category><category term="writeup"></category></entry><entry><title>Solving WarmUp from csictf CTF 2020</title><link href="/solving-warmup-from-csictf-ctf-2020.html" rel="alternate"></link><published>2020-07-22T15:55:00+05:30</published><updated>2020-07-22T15:55:00+05:30</updated><author><name>0xshrimantyogi</name></author><id>tag:None,2020-07-22:/solving-warmup-from-csictf-ctf-2020.html</id><summary type="html">&lt;p&gt;Exploiting PHP Type Juggling issue by supplying magic hash via GET variable&lt;/p&gt;</summary><content type="html">&lt;p&gt;The author note for WarmUp challenge from csictf CTF 2020.&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;If&lt;/span&gt; &lt;span class="n"&gt;you&lt;/span&gt; &lt;span class="n"&gt;know&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;you&lt;/span&gt; &lt;span class="n"&gt;know&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="n"&gt;otherwise&lt;/span&gt; &lt;span class="n"&gt;you&lt;/span&gt; &lt;span class="n"&gt;might&lt;/span&gt; &lt;span class="n"&gt;waste&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;lot&lt;/span&gt; &lt;span class="k"&gt;of&lt;/span&gt; &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+
+&lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;chall&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;csivit&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;30272&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;Visiting the challenge URL I was presented with the following source code.&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;isset&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$_GET&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;hash&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$_GET&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;hash&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;===&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;10932435112&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="k"&gt;die&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Not so easy mate.&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+
+        &lt;span class="nv"&gt;$hash&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;sha1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$_GET&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;hash&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]);&lt;/span&gt;
+        &lt;span class="nv"&gt;$target&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;sha1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10932435112&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$hash&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nv"&gt;$target&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="k"&gt;include&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;flag.php&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="nv"&gt;$flag&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;csictf{loser}&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nb"&gt;show_source&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;__FILE__&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="cp"&gt;?&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;Now, lets understand the code first. We have to craft a URL with a parameter &lt;strong&gt;hash&lt;/strong&gt; and its value which is not equal to 
+the number &lt;strong&gt;10932435112&lt;/strong&gt;. This is mandatory in order to evade &lt;strong&gt;if&lt;/strong&gt; loop at line 3. Next, the value of &lt;strong&gt;hash&lt;/strong&gt; variable should be such, 
+that its SHA1 hash and the SHA1 hash of &lt;strong&gt;10932435112&lt;/strong&gt; is same. Only then we will be presented with the flag.&lt;/p&gt;
+&lt;p&gt;Hmm !!! This was tough and like the challenge quoted &lt;strong&gt;If you know, you know; otherwise you might waste a lot of time&lt;/strong&gt;. So, by not knowing 
+the solution I made up my mind to sacrifice lot of time :P&lt;/p&gt;
+&lt;p&gt;So after a lot of searching around I came across this concept called &lt;strong&gt;type juggling&lt;/strong&gt; in PHP. More details about this can be found &lt;a href="https://www.whitehatsec.com/blog/magic-hashes/"&gt;here&lt;/a&gt;.
+General idea is to find a number/string which is not equal to 10932435112 but whose sha1 hash matches sha1(10932435112). To understand why this kind of type juggling works 
+we need to understand what the below SHA1 value is and how it is represented. This notation is called scientific notation. &lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;sha1(10932435112) = 0e07766915004133176347055865026311692244&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;If we convert from scientific notation to decimal it becomes.&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;0e07766915004133176347055865026311692244 = 0 x 10^7766915004133176347055865026311692244 = 0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;So now we need a number whose sha1 hash when converted to decimal will give us 0. A quick search landed me on &lt;strong&gt;0e00000000000000000000081614617300000000&lt;/strong&gt; whose SHA1 value was as follows &lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;sha1(0e00000000000000000000081614617300000000) = 0e65307525940999632287492285468259219070&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;So when the above hash value is converted to decimal it gave&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;0e65307525940999632287492285468259219070 = 0 x 10^65307525940999632287492285468259219070 = 0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;All input provided in the $_GET superglobal variable is of the type string and due to the PHP's type juggling issue both strings are treated as floating point numbers written in scientific notation and when cast to float they both equal 0. &lt;/p&gt;
+&lt;p&gt;So the final payload becomes &lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c"&gt;http://chall.csivit.com:30272/?hash=0e00000000000000000000081614617300000000&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;and we get the flag...Happy ending :P&lt;/p&gt;
+&lt;p&gt;&lt;img alt="flag" src="img/12.1.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;Thanks for stopping by and reading and thanks csictf CTF team for the challenge&lt;/p&gt;
+&lt;p&gt;--0xshrimantyogi&lt;/p&gt;</content><category term="CTF"></category><category term="webappsec"></category><category term="PHP Type Juggling"></category><category term="writeup"></category></entry></feed>

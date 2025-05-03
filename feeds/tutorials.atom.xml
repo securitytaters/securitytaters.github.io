@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>securitytaters - Tutorials</title><link href="/" rel="alternate"></link><link href="/feeds/tutorials.atom.xml" rel="self"></link><id>/</id><updated>2020-02-17T19:00:00+05:30</updated><entry><title>Introduction to Burp Suite Plugin Stepper</title><link href="/introduction-to-burp-suite-plugin-stepper.html" rel="alternate"></link><published>2020-02-17T19:00:00+05:30</published><updated>2020-02-17T19:00:00+05:30</updated><author><name>0xm4v3rick</name></author><id>tag:None,2020-02-17:/introduction-to-burp-suite-plugin-stepper.html</id><summary type="html">&lt;p&gt;Small introduction to burp suite plugin stepper and how it can be used to speed up the testing.&lt;/p&gt;</summary><content type="html">&lt;p&gt;While trying to solve a CTF challenge I was in a situation where I needed to do multiple steps inorder to test the challenge. Although I wasn't able to solve the challenge I learned a few things along the way while trying out stepper for the first time. So here is small intro on how stepper can be used in such cases. This is pretty biginner level stuff. May help someone struggling to get started with it. The plugin is available &lt;a href="https://github.com/CoreyD97/Stepper"&gt;here&lt;/a&gt; or can be downloaded from the BApp Store. &lt;/p&gt;
+&lt;p&gt;Let's get started with the challenge scenario. Below POST request returned a hash value as shown in response. The hash value was needed to be included in the next request to validate the SMS.&lt;/p&gt;
+&lt;p&gt;Request1:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;POST&lt;/span&gt; &lt;span class="nn"&gt;/api/admin.restore&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;span class="na"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;sherlock-message.ru&lt;/span&gt;
+&lt;span class="na"&gt;User-Agent&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0&lt;/span&gt;
+&lt;span class="na"&gt;Accept&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;*/*&lt;/span&gt;
+&lt;span class="na"&gt;Accept-Language&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;en-US,en;q=0.5&lt;/span&gt;
+&lt;span class="na"&gt;Accept-Encoding&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;gzip, deflate&lt;/span&gt;
+&lt;span class="na"&gt;X-Requested-With&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;XMLHttpRequest&lt;/span&gt;
+&lt;span class="na"&gt;Origin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;http://sherlock-message.ru&lt;/span&gt;
+&lt;span class="na"&gt;Connection&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;close&lt;/span&gt;
+&lt;span class="na"&gt;Referer&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;http://sherlock-message.ru/admin&lt;/span&gt;
+&lt;span class="na"&gt;Content-Length&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;0&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;Response1:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nc"&gt;1&lt;/span&gt; &lt;span class="nt"&gt;200&lt;/span&gt; &lt;span class="nt"&gt;OK&lt;/span&gt;
+&lt;span class="nt"&gt;Server&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;nginx&lt;/span&gt;
+&lt;span class="nt"&gt;Date&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;Sun&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;16&lt;/span&gt; &lt;span class="nt"&gt;Feb&lt;/span&gt; &lt;span class="nt"&gt;2020&lt;/span&gt; &lt;span class="nt"&gt;09&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;32&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;39&lt;/span&gt; &lt;span class="nt"&gt;GMT&lt;/span&gt;
+&lt;span class="nt"&gt;Content-Type&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;text&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;charset&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nt"&gt;UTF-8&lt;/span&gt;
+&lt;span class="nt"&gt;Connection&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;close&lt;/span&gt;
+&lt;span class="nt"&gt;Content-Length&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;95&lt;/span&gt;
+
+&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="err"&gt;&amp;quot;status&amp;quot;:&amp;quot;success&amp;quot;,&amp;quot;response&amp;quot;:{&amp;quot;need_sms&amp;quot;:true,&amp;quot;new_hash&amp;quot;:&amp;quot;0e2eafbefa3343f7dd43fa34e58e8d8b&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="err"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;SMS validation request is as below. Uses hash value from previous request(above) along with the sms code.
+Request2:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;POST&lt;/span&gt; &lt;span class="nn"&gt;/api/admin.restore&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;span class="na"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;sherlock-message.ru&lt;/span&gt;
+&lt;span class="na"&gt;User-Agent&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0&lt;/span&gt;
+&lt;span class="na"&gt;Accept&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;*/*&lt;/span&gt;
+&lt;span class="na"&gt;Accept-Language&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;en-US,en;q=0.5&lt;/span&gt;
+&lt;span class="na"&gt;Accept-Encoding&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;gzip, deflate&lt;/span&gt;
+&lt;span class="na"&gt;Content-Type&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;application/x-www-form-urlencoded; charset=UTF-8&lt;/span&gt;
+&lt;span class="na"&gt;X-Requested-With&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;XMLHttpRequest&lt;/span&gt;
+&lt;span class="na"&gt;Content-Length&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;51&lt;/span&gt;
+&lt;span class="na"&gt;Origin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;http://sherlock-message.ru&lt;/span&gt;
+&lt;span class="na"&gt;Connection&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;close&lt;/span&gt;
+&lt;span class="na"&gt;Referer&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;http://sherlock-message.ru/admin&lt;/span&gt;
+
+hash=0e2eafbefa3343f7dd43fa34e58e8d8b&amp;amp;sms_code=123456
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;Response2:&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nc"&gt;1&lt;/span&gt; &lt;span class="nt"&gt;200&lt;/span&gt; &lt;span class="nt"&gt;OK&lt;/span&gt;
+&lt;span class="nt"&gt;Server&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;nginx&lt;/span&gt;
+&lt;span class="nt"&gt;Date&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;Sun&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;16&lt;/span&gt; &lt;span class="nt"&gt;Feb&lt;/span&gt; &lt;span class="nt"&gt;2020&lt;/span&gt; &lt;span class="nt"&gt;09&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;32&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="nd"&gt;39&lt;/span&gt; &lt;span class="nt"&gt;GMT&lt;/span&gt;
+&lt;span class="nt"&gt;Content-Type&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;text&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; &lt;span class="nt"&gt;charset&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nt"&gt;UTF-8&lt;/span&gt;
+&lt;span class="nt"&gt;Connection&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;close&lt;/span&gt;
+&lt;span class="nt"&gt;Content-Length&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;95&lt;/span&gt;
+
+&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="err"&gt;&amp;quot;status&amp;quot;:&amp;quot;success&amp;quot;,&amp;quot;response&amp;quot;:{&amp;quot;need_sms&amp;quot;:true,&amp;quot;new_hash&amp;quot;:&amp;quot;5c608733c8545b4633cc31a400959e03&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="err"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;As we can see a new token is returned in the above response. The old one expires and gives error if used again. In order to test the validation request, the new token is required to be used in the next SMS validation request. The hash acts like a anti-CSRF token here. So repeating first request, than copying the hash/token and using it in second request becomes a lot of tedious work using just the repeater. This is where stepper comes in and does a lot of heavy lifting. Let's see how it can be used.&lt;/p&gt;
+&lt;p&gt;We send the first request to the stepper and use a regex to capture the token/hash from response. Create a variable using &lt;strong&gt;Add Variable&lt;/strong&gt; for that, random variable name will be created.&lt;br /&gt;
+&lt;strong&gt;Tip&lt;/strong&gt;: Variables can be renamed by double clicking the Identifier.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="var" src="img/4.1.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;Let's understand how the follwoing regex is used. Regex:  &lt;strong&gt;(?:"new_hash":")(.*?)(?:")&lt;/strong&gt;&lt;br /&gt;
+First group of the regex &lt;strong&gt;(?:"new_hash":")&lt;/strong&gt; is non-capturing, proves as a starting point for the string and checks occurrence of &lt;strong&gt;"new_hash":"&lt;/strong&gt;&lt;br /&gt;
+Second group &lt;strong&gt;(.*?)&lt;/strong&gt; which is capturing group, will collect everything after the first group untill the third group is found.&lt;br /&gt;
+Third group &lt;strong&gt;(?:")&lt;/strong&gt; again a non capturing group to mark end of collection and it checks for &lt;strong&gt;"&lt;/strong&gt;&lt;br /&gt;
+More explanation can be found by inserting the above regex &lt;a href="https://regexr.com/"&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Now the captured hash is stored in &lt;strong&gt;hash&lt;/strong&gt; variable. These variables can be accessed using the syntax &lt;strong&gt;$VAR:VARIABLE_IDENTIFIER$&lt;/strong&gt; or &lt;strong&gt;$var:VARIABLE_IDENTIFIER$&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;We forward the second request to stpper now and use the previously collected hash here using &lt;strong&gt;$VAR:hash$&lt;/strong&gt;. Now we can &lt;strong&gt;Execute Sequence&lt;/strong&gt; and second step should take the hash from first step and use it. &lt;strong&gt;Execute Sequence&lt;/strong&gt; executes all the steps mentioned there from Step 1 to Step 2 to ... Step N in that order. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="var" src="img/4.2.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;Let's check the Stepper Replacement tab as below and we should see the variable being replaced by the actual value. Alternatively another plugin such as logger++ or flow can also be used to check that variables are replaced as required. &lt;br /&gt;
+Note: Hash value varies here because I took the screenshot later on.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="var" src="img/4.3.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;Now insert your payloads and start testing the same away as repeater. A sample request with a payload would look something like below. Insert your payloads and hit &lt;strong&gt;Execute Sequence&lt;/strong&gt; and it should work smoothly.&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;POST&lt;/span&gt; &lt;span class="nn"&gt;/api/admin.restore&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;span class="na"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;sherlock-message.ru&lt;/span&gt;
+&lt;span class="na"&gt;User-Agent&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0&lt;/span&gt;
+&lt;span class="na"&gt;Accept&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;*/*&lt;/span&gt;
+&lt;span class="na"&gt;Accept-Language&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;en-US,en;q=0.5&lt;/span&gt;
+&lt;span class="na"&gt;Accept-Encoding&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;gzip, deflate&lt;/span&gt;
+&lt;span class="na"&gt;Content-Type&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;application/x-www-form-urlencoded; charset=UTF-8&lt;/span&gt;
+&lt;span class="na"&gt;X-Requested-With&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;XMLHttpRequest&lt;/span&gt;
+&lt;span class="na"&gt;Content-Length&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;51&lt;/span&gt;
+&lt;span class="na"&gt;Origin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;http://sherlock-message.ru&lt;/span&gt;
+&lt;span class="na"&gt;Connection&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;close&lt;/span&gt;
+&lt;span class="na"&gt;Referer&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;http://sherlock-message.ru/admin&lt;/span&gt;
+
+hash=$VAR:hash$&amp;amp;sms_code=1&amp;#39;--
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;We can also use the same variable again anywhere in the request. An example of this would be something like below.&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;hash=$VAR:hash$&amp;amp;sms_code=$VAR:hash$&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+
+&lt;p&gt;That's it. Effective way to use the stepper and continue the testing on the request without tedious back and forth between multiple request using multiple values. Feel free to ping me on &lt;a href="https://twitter.com/0xm4v3rick"&gt;twitter&lt;/a&gt; for any feedback or queries. I will try to help as much as I can.&lt;/p&gt;</content><category term="Tutorials"></category><category term="webappsec"></category><category term="burp suite"></category><category term="repeater"></category><category term="stepper"></category><category term="plugin"></category></entry></feed>
