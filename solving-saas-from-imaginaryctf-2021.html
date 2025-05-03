@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="/theme/pygments/rrt.min.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="securitytaters Atom">
+
+
+
+
+
+<meta name="author" content="0xm4v3rick" />
+<meta name="description" content="CTF challenge based on sed linux utility." />
+<meta name="keywords" content="webappsec, writeup, linux, bypass">
+
+
+<meta property="og:site_name" content="securitytaters"/>
+<meta property="og:title" content="Solving SaaS from ImaginaryCTF 2021"/>
+<meta property="og:description" content="CTF challenge based on sed linux utility."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/solving-saas-from-imaginaryctf-2021.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2021-07-27 21:10:00+05:30"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/0xm4v3rick.html">
+<meta property="article:section" content="CTF"/>
+<meta property="article:tag" content="webappsec"/>
+<meta property="article:tag" content="writeup"/>
+<meta property="article:tag" content="linux"/>
+<meta property="article:tag" content="bypass"/>
+<meta property="og:image" content="">
+
+  <title>securitytaters &ndash; Solving SaaS from ImaginaryCTF 2021</title>
+
+</head>
+<body>
+  <aside>
+    <div id='blah'>
+
+<h1><a style="font-weight:bold;font-size:xx-large" href="https://securitytaters.info">securitytaters</a></h1>
+<hr>
+    </div>
+
+    <div style="margin-top: -90px;">
+      <h1><a href=""></a></h1>
+
+
+      <nav>
+        <ul class="list">
+
+	<h2>0xm4v3rick</h2>
+            <li><a target="_blank" href="https://twitter.com/0xm4v3rick" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xm4v3rick" >Github</a></li>
+
+	<h2>0xshrimantyogi</h2>
+            <li><a target="_blank" href="https://twitter.com/0xshrimantyogi" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xshrimantyogi" >Github</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Git" href="#" target="_blank">
+            <i class="fab fa-Git">
+            </i>
+
+          </a></li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+            <i class="fab fa-Another social link">
+            </i>
+
+          </a></li>
+      </ul>
+ 					<h2><a href="/archives.html">Archives</a></h2> <br/>
+					<h2><a href="/authors.html">Authors</a></h2>
+</br>
+<h3 style="color: #00ff28;"><b>This site uses Fira Code so the code will not appear as usual but it will work if you copy and use it directly.</b></h3>
+    </div>
+
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="solving-saas-from-imaginaryctf-2021">Solving SaaS from ImaginaryCTF 2021</h1>
+    <p>
+          Posted on Tue 27 July 2021 in <a href="/category/ctf.html">CTF</a>
+
+by <a href="0xm4v3rick.html">0xm4v3rick</a>
+    </p>
+  </header>
+<hr>
+
+  <div>
+    <p>The author note for this CTF challenge.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">Welcome to Sed as a Service! Now you can filter lorem ipsum to your heart&#39;s desire!</span>
+</pre></div>
+</td></tr></table>
+
+<p>Attachment(source code) is provided along with the challenge URL. After visiting the URL we see a page to provide inputs to sed utility as shown below. Putting in some random input as per the provided syntax will output contents of some file.</p>
+<p><img alt="landing" src="img/16.1.jpg" /></p>
+<p><img alt="landing" src="img/16.2.jpg" /></p>
+<p>Looking at the provided source code gives us some idea of how the input is processed. Lets go through the important parts of the code.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span>
+<span class="kn">import</span> <span class="nn">html</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">)</span>
+
+<span class="n">blacklist</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;flag&quot;</span><span class="p">,</span> <span class="s2">&quot;cat&quot;</span><span class="p">,</span> <span class="s2">&quot;|&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot;;&quot;</span><span class="p">,</span> <span class="s2">&quot;`&quot;</span><span class="p">,</span> <span class="s2">&quot;$&quot;</span><span class="p">]</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/backend&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">backend</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">blacklist</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s1">&#39;query&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="s2">&quot;Stop hacking.</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="n">html</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sed </span><span class="si">{request.args[&#39;query&#39;]}</span><span class="s2"> stuff.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</td></tr></table>
+
+<p>On line 13 we see a route to <strong>backend</strong> where our request gets sent. The code at line 16 than checks the <strong>blacklist</strong> mentioned at line 11 against our input in variable <strong>query</strong>.
+If any of the blacklisted words are found our input will be rejected. Otherwise line 18 processes the input and returns the output.</p>
+<p>My first thought was to see if I can get the code to execute any commands of my own by bypassing the blacklist. So I searched around for some resources that could help in that direction. After trying a few things I realized that executing my command might be difficult than I thought considering the blacklisted special characters which allows for chaining commands.</p>
+<p>It was time to check other avenues to break the code. Having used sed utility a few times I realized that it outputs the contents of the provided file by default to show the changes. So as long as we are able to use it on flag file we should be able to retrieve its contents. Now we needed to figure out how to bypass the word <strong>flag</strong>. That was easy as most command injection bypass resources will highlight multiple methods to use common words in different ways. </p>
+<p>For example linux command line will match <strong>fla?</strong> as flat or flap, so on and so forth. ? will be replaced by any character available in the list of files in this case. With that all we had to do is provide the input similar to the below and that gave us the flag. Sometimes we just need to use the provided options instead of bypassing them ;)</p>
+<p><strong>'s/hello/hewwo/g' fl?g.txt</strong></p>
+<p><img alt="landing" src="img/16.3.jpg" /></p>
+<p>That was a nice little chal from the Imaginary CTF team. Thanks to them. Feel free to ping me on twitter for feedback or queries.<br />
+- 0xm4v3rick</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/webappsec.html">webappsec</a>
+      <a href="/tag/writeup.html">writeup</a>
+      <a href="/tag/linux.html">linux</a>
+      <a href="/tag/bypass.html">bypass</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>    Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+
+<br> &copy; Copyright 2020, securitytaters.info
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " securitytaters ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>

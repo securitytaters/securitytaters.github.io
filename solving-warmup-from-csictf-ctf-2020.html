@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="/theme/pygments/rrt.min.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="securitytaters Atom">
+
+
+
+
+
+<meta name="author" content="0xshrimantyogi" />
+<meta name="description" content="Exploiting PHP Type Juggling issue by supplying magic hash via GET variable" />
+<meta name="keywords" content="webappsec, PHP Type Juggling, writeup">
+
+
+<meta property="og:site_name" content="securitytaters"/>
+<meta property="og:title" content="Solving WarmUp from csictf CTF 2020"/>
+<meta property="og:description" content="Exploiting PHP Type Juggling issue by supplying magic hash via GET variable"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/solving-warmup-from-csictf-ctf-2020.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-07-22 15:55:00+05:30"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/0xshrimantyogi.html">
+<meta property="article:section" content="CTF"/>
+<meta property="article:tag" content="webappsec"/>
+<meta property="article:tag" content="PHP Type Juggling"/>
+<meta property="article:tag" content="writeup"/>
+<meta property="og:image" content="">
+
+  <title>securitytaters &ndash; Solving WarmUp from csictf CTF 2020</title>
+
+</head>
+<body>
+  <aside>
+    <div id='blah'>
+
+<h1><a style="font-weight:bold;font-size:xx-large" href="https://securitytaters.info">securitytaters</a></h1>
+<hr>
+    </div>
+
+    <div style="margin-top: -90px;">
+      <h1><a href=""></a></h1>
+
+
+      <nav>
+        <ul class="list">
+
+	<h2>0xm4v3rick</h2>
+            <li><a target="_blank" href="https://twitter.com/0xm4v3rick" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xm4v3rick" >Github</a></li>
+
+	<h2>0xshrimantyogi</h2>
+            <li><a target="_blank" href="https://twitter.com/0xshrimantyogi" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xshrimantyogi" >Github</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Git" href="#" target="_blank">
+            <i class="fab fa-Git">
+            </i>
+
+          </a></li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+            <i class="fab fa-Another social link">
+            </i>
+
+          </a></li>
+      </ul>
+ 					<h2><a href="/archives.html">Archives</a></h2> <br/>
+					<h2><a href="/authors.html">Authors</a></h2>
+</br>
+<h3 style="color: #00ff28;"><b>This site uses Fira Code so the code will not appear as usual but it will work if you copy and use it directly.</b></h3>
+    </div>
+
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="solving-warmup-from-csictf-ctf-2020">Solving WarmUp from csictf CTF 2020</h1>
+    <p>
+          Posted on Wed 22 July 2020 in <a href="/category/ctf.html">CTF</a>
+
+by <a href="0xshrimantyogi.html">0xshrimantyogi</a>
+    </p>
+  </header>
+<hr>
+
+  <div>
+    <p>The author note for WarmUp challenge from csictf CTF 2020.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">If</span> <span class="n">you</span> <span class="n">know</span><span class="p">,</span> <span class="n">you</span> <span class="n">know</span><span class="p">;</span> <span class="n">otherwise</span> <span class="n">you</span> <span class="n">might</span> <span class="n">waste</span> <span class="n">a</span> <span class="n">lot</span> <span class="k">of</span> <span class="n">time</span><span class="p">.</span>
+
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">chall</span><span class="p">.</span><span class="n">csivit</span><span class="p">.</span><span class="n">com</span><span class="p">:</span><span class="mi">30272</span>
+</pre></div>
+</td></tr></table>
+
+<p>Visiting the challenge URL I was presented with the following source code.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">&#39;hash&#39;</span><span class="p">]))</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">&#39;hash&#39;</span><span class="p">]</span> <span class="o">===</span> <span class="s2">&quot;10932435112&quot;</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">die</span><span class="p">(</span><span class="s1">&#39;Not so easy mate.&#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="nv">$hash</span> <span class="o">=</span> <span class="nb">sha1</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">&#39;hash&#39;</span><span class="p">]);</span>
+        <span class="nv">$target</span> <span class="o">=</span> <span class="nb">sha1</span><span class="p">(</span><span class="mi">10932435112</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="nv">$hash</span> <span class="o">==</span> <span class="nv">$target</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">include</span><span class="p">(</span><span class="s1">&#39;flag.php&#39;</span><span class="p">);</span>
+            <span class="k">print</span> <span class="nv">$flag</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">print</span> <span class="s2">&quot;csictf{loser}&quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nb">show_source</span><span class="p">(</span><span class="no">__FILE__</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+</td></tr></table>
+
+<p>Now, lets understand the code first. We have to craft a URL with a parameter <strong>hash</strong> and its value which is not equal to 
+the number <strong>10932435112</strong>. This is mandatory in order to evade <strong>if</strong> loop at line 3. Next, the value of <strong>hash</strong> variable should be such, 
+that its SHA1 hash and the SHA1 hash of <strong>10932435112</strong> is same. Only then we will be presented with the flag.</p>
+<p>Hmm !!! This was tough and like the challenge quoted <strong>If you know, you know; otherwise you might waste a lot of time</strong>. So, by not knowing 
+the solution I made up my mind to sacrifice lot of time :P</p>
+<p>So after a lot of searching around I came across this concept called <strong>type juggling</strong> in PHP. More details about this can be found <a href="https://www.whitehatsec.com/blog/magic-hashes/">here</a>.
+General idea is to find a number/string which is not equal to 10932435112 but whose sha1 hash matches sha1(10932435112). To understand why this kind of type juggling works 
+we need to understand what the below SHA1 value is and how it is represented. This notation is called scientific notation. </p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">sha1(10932435112) = 0e07766915004133176347055865026311692244</span>
+</pre></div>
+</td></tr></table>
+
+<p>If we convert from scientific notation to decimal it becomes.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">0e07766915004133176347055865026311692244 = 0 x 10^7766915004133176347055865026311692244 = 0</span>
+</pre></div>
+</td></tr></table>
+
+<p>So now we need a number whose sha1 hash when converted to decimal will give us 0. A quick search landed me on <strong>0e00000000000000000000081614617300000000</strong> whose SHA1 value was as follows </p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">sha1(0e00000000000000000000081614617300000000) = 0e65307525940999632287492285468259219070</span>
+</pre></div>
+</td></tr></table>
+
+<p>So when the above hash value is converted to decimal it gave</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">0e65307525940999632287492285468259219070 = 0 x 10^65307525940999632287492285468259219070 = 0</span>
+</pre></div>
+</td></tr></table>
+
+<p>All input provided in the $_GET superglobal variable is of the type string and due to the PHP's type juggling issue both strings are treated as floating point numbers written in scientific notation and when cast to float they both equal 0. </p>
+<p>So the final payload becomes </p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c">http://chall.csivit.com:30272/?hash=0e00000000000000000000081614617300000000</span>
+</pre></div>
+</td></tr></table>
+
+<p>and we get the flag...Happy ending :P</p>
+<p><img alt="flag" src="img/12.1.jpg" /></p>
+<p>Thanks for stopping by and reading and thanks csictf CTF team for the challenge</p>
+<p>--0xshrimantyogi</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/webappsec.html">webappsec</a>
+      <a href="/tag/php-type-juggling.html">PHP Type Juggling</a>
+      <a href="/tag/writeup.html">writeup</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>    Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+
+<br> &copy; Copyright 2020, securitytaters.info
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " securitytaters ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>

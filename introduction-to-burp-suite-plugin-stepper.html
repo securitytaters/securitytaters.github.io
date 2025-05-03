@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="/theme/pygments/rrt.min.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/fontawesome.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/brands.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/solid.css">
+
+
+    <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="securitytaters Atom">
+
+
+
+
+
+<meta name="author" content="0xm4v3rick" />
+<meta name="description" content="Small introduction to burp suite plugin stepper and how it can be used to speed up the testing." />
+<meta name="keywords" content="webappsec, burp suite, repeater, stepper, plugin">
+
+
+<meta property="og:site_name" content="securitytaters"/>
+<meta property="og:title" content="Introduction to Burp Suite Plugin Stepper"/>
+<meta property="og:description" content="Small introduction to burp suite plugin stepper and how it can be used to speed up the testing."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/introduction-to-burp-suite-plugin-stepper.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-02-17 19:00:00+05:30"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/0xm4v3rick.html">
+<meta property="article:section" content="Tutorials"/>
+<meta property="article:tag" content="webappsec"/>
+<meta property="article:tag" content="burp suite"/>
+<meta property="article:tag" content="repeater"/>
+<meta property="article:tag" content="stepper"/>
+<meta property="article:tag" content="plugin"/>
+<meta property="og:image" content="">
+
+  <title>securitytaters &ndash; Introduction to Burp Suite Plugin Stepper</title>
+
+</head>
+<body>
+  <aside>
+    <div id='blah'>
+
+<h1><a style="font-weight:bold;font-size:xx-large" href="https://securitytaters.info">securitytaters</a></h1>
+<hr>
+    </div>
+
+    <div style="margin-top: -90px;">
+      <h1><a href=""></a></h1>
+
+
+      <nav>
+        <ul class="list">
+
+	<h2>0xm4v3rick</h2>
+            <li><a target="_blank" href="https://twitter.com/0xm4v3rick" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xm4v3rick" >Github</a></li>
+
+	<h2>0xshrimantyogi</h2>
+            <li><a target="_blank" href="https://twitter.com/0xshrimantyogi" >Twitter</a></li>
+            <li><a target="_blank" href="https://github.com/0xshrimantyogi" >Github</a></li>
+
+        </ul>
+      </nav>
+
+      <ul class="social">
+          <li>
+            <a  class="sc-Git" href="#" target="_blank">
+            <i class="fab fa-Git">
+            </i>
+
+          </a></li>
+          <li>
+            <a  class="sc-Another social link" href="#" target="_blank">
+            <i class="fab fa-Another social link">
+            </i>
+
+          </a></li>
+      </ul>
+ 					<h2><a href="/archives.html">Archives</a></h2> <br/>
+					<h2><a href="/authors.html">Authors</a></h2>
+</br>
+<h3 style="color: #00ff28;"><b>This site uses Fira Code so the code will not appear as usual but it will work if you copy and use it directly.</b></h3>
+    </div>
+
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+      
+    <h1 id="introduction-to-burp-suite-plugin-stepper">Introduction to Burp Suite Plugin Stepper</h1>
+    <p>
+          Posted on Mon 17 February 2020 in <a href="/category/tutorials.html">Tutorials</a>
+
+by <a href="0xm4v3rick.html">0xm4v3rick</a>
+    </p>
+  </header>
+<hr>
+
+  <div>
+    <p>While trying to solve a CTF challenge I was in a situation where I needed to do multiple steps inorder to test the challenge. Although I wasn't able to solve the challenge I learned a few things along the way while trying out stepper for the first time. So here is small intro on how stepper can be used in such cases. This is pretty biginner level stuff. May help someone struggling to get started with it. The plugin is available <a href="https://github.com/CoreyD97/Stepper">here</a> or can be downloaded from the BApp Store. </p>
+<p>Let's get started with the challenge scenario. Below POST request returned a hash value as shown in response. The hash value was needed to be included in the next request to validate the SMS.</p>
+<p>Request1:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/admin.restore</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">sherlock-message.ru</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">*/*</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">X-Requested-With</span><span class="o">:</span> <span class="l">XMLHttpRequest</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://sherlock-message.ru</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://sherlock-message.ru/admin</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">0</span>
+</pre></div>
+</td></tr></table>
+
+<p>Response1:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">HTTP</span><span class="o">/</span><span class="nt">1</span><span class="p">.</span><span class="nc">1</span> <span class="nt">200</span> <span class="nt">OK</span>
+<span class="nt">Server</span><span class="o">:</span> <span class="nt">nginx</span>
+<span class="nt">Date</span><span class="o">:</span> <span class="nt">Sun</span><span class="o">,</span> <span class="nt">16</span> <span class="nt">Feb</span> <span class="nt">2020</span> <span class="nt">09</span><span class="p">:</span><span class="nd">32</span><span class="p">:</span><span class="nd">39</span> <span class="nt">GMT</span>
+<span class="nt">Content-Type</span><span class="o">:</span> <span class="nt">text</span><span class="o">/</span><span class="nt">html</span><span class="o">;</span> <span class="nt">charset</span><span class="o">=</span><span class="nt">UTF-8</span>
+<span class="nt">Connection</span><span class="o">:</span> <span class="nt">close</span>
+<span class="nt">Content-Length</span><span class="o">:</span> <span class="nt">95</span>
+
+<span class="p">{</span><span class="err">&quot;status&quot;:&quot;success&quot;,&quot;response&quot;:{&quot;need_sms&quot;:true,&quot;new_hash&quot;:&quot;0e2eafbefa3343f7dd43fa34e58e8d8b&quot;</span><span class="p">}</span><span class="err">}</span>
+</pre></div>
+</td></tr></table>
+
+<p>SMS validation request is as below. Uses hash value from previous request(above) along with the sms code.
+Request2:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/admin.restore</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">sherlock-message.ru</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">*/*</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded; charset=UTF-8</span>
+<span class="na">X-Requested-With</span><span class="o">:</span> <span class="l">XMLHttpRequest</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">51</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://sherlock-message.ru</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://sherlock-message.ru/admin</span>
+
+hash=0e2eafbefa3343f7dd43fa34e58e8d8b&amp;sms_code=123456
+</pre></div>
+</td></tr></table>
+
+<p>Response2:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nt">HTTP</span><span class="o">/</span><span class="nt">1</span><span class="p">.</span><span class="nc">1</span> <span class="nt">200</span> <span class="nt">OK</span>
+<span class="nt">Server</span><span class="o">:</span> <span class="nt">nginx</span>
+<span class="nt">Date</span><span class="o">:</span> <span class="nt">Sun</span><span class="o">,</span> <span class="nt">16</span> <span class="nt">Feb</span> <span class="nt">2020</span> <span class="nt">09</span><span class="p">:</span><span class="nd">32</span><span class="p">:</span><span class="nd">39</span> <span class="nt">GMT</span>
+<span class="nt">Content-Type</span><span class="o">:</span> <span class="nt">text</span><span class="o">/</span><span class="nt">html</span><span class="o">;</span> <span class="nt">charset</span><span class="o">=</span><span class="nt">UTF-8</span>
+<span class="nt">Connection</span><span class="o">:</span> <span class="nt">close</span>
+<span class="nt">Content-Length</span><span class="o">:</span> <span class="nt">95</span>
+
+<span class="p">{</span><span class="err">&quot;status&quot;:&quot;success&quot;,&quot;response&quot;:{&quot;need_sms&quot;:true,&quot;new_hash&quot;:&quot;5c608733c8545b4633cc31a400959e03&quot;</span><span class="p">}</span><span class="err">}</span>
+</pre></div>
+</td></tr></table>
+
+<p>As we can see a new token is returned in the above response. The old one expires and gives error if used again. In order to test the validation request, the new token is required to be used in the next SMS validation request. The hash acts like a anti-CSRF token here. So repeating first request, than copying the hash/token and using it in second request becomes a lot of tedious work using just the repeater. This is where stepper comes in and does a lot of heavy lifting. Let's see how it can be used.</p>
+<p>We send the first request to the stepper and use a regex to capture the token/hash from response. Create a variable using <strong>Add Variable</strong> for that, random variable name will be created.<br />
+<strong>Tip</strong>: Variables can be renamed by double clicking the Identifier.</p>
+<p><img alt="var" src="img/4.1.jpg" /></p>
+<p>Let's understand how the follwoing regex is used. Regex:  <strong>(?:"new_hash":")(.*?)(?:")</strong><br />
+First group of the regex <strong>(?:"new_hash":")</strong> is non-capturing, proves as a starting point for the string and checks occurrence of <strong>"new_hash":"</strong><br />
+Second group <strong>(.*?)</strong> which is capturing group, will collect everything after the first group untill the third group is found.<br />
+Third group <strong>(?:")</strong> again a non capturing group to mark end of collection and it checks for <strong>"</strong><br />
+More explanation can be found by inserting the above regex <a href="https://regexr.com/">here</a></p>
+<p>Now the captured hash is stored in <strong>hash</strong> variable. These variables can be accessed using the syntax <strong>$VAR:VARIABLE_IDENTIFIER$</strong> or <strong>$var:VARIABLE_IDENTIFIER$</strong>.</p>
+<p>We forward the second request to stpper now and use the previously collected hash here using <strong>$VAR:hash$</strong>. Now we can <strong>Execute Sequence</strong> and second step should take the hash from first step and use it. <strong>Execute Sequence</strong> executes all the steps mentioned there from Step 1 to Step 2 to ... Step N in that order. </p>
+<p><img alt="var" src="img/4.2.jpg" /></p>
+<p>Let's check the Stepper Replacement tab as below and we should see the variable being replaced by the actual value. Alternatively another plugin such as logger++ or flow can also be used to check that variables are replaced as required. <br />
+Note: Hash value varies here because I took the screenshot later on.</p>
+<p><img alt="var" src="img/4.3.jpg" /></p>
+<p>Now insert your payloads and start testing the same away as repeater. A sample request with a payload would look something like below. Insert your payloads and hit <strong>Execute Sequence</strong> and it should work smoothly.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nf">POST</span> <span class="nn">/api/admin.restore</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">sherlock-message.ru</span>
+<span class="na">User-Agent</span><span class="o">:</span> <span class="l">Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0</span>
+<span class="na">Accept</span><span class="o">:</span> <span class="l">*/*</span>
+<span class="na">Accept-Language</span><span class="o">:</span> <span class="l">en-US,en;q=0.5</span>
+<span class="na">Accept-Encoding</span><span class="o">:</span> <span class="l">gzip, deflate</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/x-www-form-urlencoded; charset=UTF-8</span>
+<span class="na">X-Requested-With</span><span class="o">:</span> <span class="l">XMLHttpRequest</span>
+<span class="na">Content-Length</span><span class="o">:</span> <span class="l">51</span>
+<span class="na">Origin</span><span class="o">:</span> <span class="l">http://sherlock-message.ru</span>
+<span class="na">Connection</span><span class="o">:</span> <span class="l">close</span>
+<span class="na">Referer</span><span class="o">:</span> <span class="l">http://sherlock-message.ru/admin</span>
+
+hash=$VAR:hash$&amp;sms_code=1&#39;--
+</pre></div>
+</td></tr></table>
+
+<p>We can also use the same variable again anywhere in the request. An example of this would be something like below.</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="err">hash=$VAR:hash$&amp;sms_code=$VAR:hash$</span>
+</pre></div>
+</td></tr></table>
+
+<p>That's it. Effective way to use the stepper and continue the testing on the request without tedious back and forth between multiple request using multiple values. Feel free to ping me on <a href="https://twitter.com/0xm4v3rick">twitter</a> for any feedback or queries. I will try to help as much as I can.</p>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/webappsec.html">webappsec</a>
+      <a href="/tag/burp-suite.html">burp suite</a>
+      <a href="/tag/repeater.html">repeater</a>
+      <a href="/tag/stepper.html">stepper</a>
+      <a href="/tag/plugin.html">plugin</a>
+    </p>
+  </div>
+
+
+
+
+
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>    Built with <a href="http://getpelican.com" target="_blank">Pelican</a> using <a href="http://bit.ly/flex-pelican" target="_blank">Flex</a> theme
+
+<br> &copy; Copyright 2020, securitytaters.info
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " securitytaters ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
+
+</body>
+</html>
