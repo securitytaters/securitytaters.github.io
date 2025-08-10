@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="CTF challenge all based on enumeration and troubleshooting.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solving Apollo 1337 from San Diego CTF 2021">
+<meta property="og:url" content="http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/">
+<meta property="og:site_name" content="securitytaters">
+<meta property="og:description" content="CTF challenge all based on enumeration and troubleshooting.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/15.1.jpg">
+<meta property="article:published_time" content="2021-05-10T04:30:00.000Z">
+<meta property="article:modified_time" content="2025-08-10T09:26:05.162Z">
+<meta property="article:author" content="0xm4v3rick">
+<meta property="article:tag" content="webappsec">
+<meta property="article:tag" content="writeup">
+<meta property="article:tag" content="enumeration">
+<meta property="article:tag" content="API">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/15.1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Solving Apollo 1337 from San Diego CTF 2021</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Archive</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/Solving-SaaS-from-ImaginaryCTF-2021/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/solving-autograder-from-wpictf-ctf-2020/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&text=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&is_video=false&description=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Solving Apollo 1337 from San Diego CTF 2021&body=Check out this article: http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&name=Solving Apollo 1337 from San Diego CTF 2021&description=CTF challenge all based on enumeration and troubleshooting."><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&t=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Solving Apollo 1337 from San Diego CTF 2021
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+	<p>Author : 
+        <span class="p-name" itemprop="name">0xm4v3rick</span>
+	</p>
+      </span>
+      
+    <div class="postdate">
+      
+        Created: <time datetime="2021-05-10T04:30:00.000Z" class="dt-published" itemprop="datePublished">10-05-2021</time>
+        
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/API/" rel="tag">API</a>, <a class="p-category" href="/tags/enumeration/" rel="tag">enumeration</a>, <a class="p-category" href="/tags/webappsec/" rel="tag">webappsec</a>, <a class="p-category" href="/tags/writeup/" rel="tag">writeup</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>The author’s note for this CTF challenge.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Apollo 1337</span><br><span class="line">Hey there intern! We have a rocket launch scheduled for noon today and the launch interface is down. You&#x27;ll need to directly use the API to launch the rocket. No, we don&#x27;t have any documentation. And     quickly, our shareholders are watching!</span><br><span class="line">Website</span><br><span class="line">https://space.sdc.tf/</span><br></pre></td></tr></table></figure>
+
+<p>Visiting the website shows below page indicating frontend and backend status for the website.</p>
+<p><img src="/solving-apollo-1337-from-san-diego-ctf-2021/15.1.jpg" alt="alt"></p>
+<p>As mentioned in the challenge note we will need to use the API, so lets look at the requests generated. We see a status API showing information about the health of the services.</p>
+<p>Request:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">GET /api/status?verbose= HTTP/2</span><br><span class="line">Host: space.sdc.tf</span><br><span class="line">Cookie: __cfduid=d78c68cc9fdea32fb380f38f0ab1825a21620452158</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-US,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Referer: https://space.sdc.tf/</span><br><span class="line">Te: trailers</span><br><span class="line">Connection: close</span><br></pre></td></tr></table></figure>
+
+<p>Response:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">HTTP/2 200 OK</span><br><span class="line">Date: Mon, 10 May 2021 04:26:50 GMT</span><br><span class="line">Content-Type: application/json; charset=utf-8</span><br><span class="line">Etag: W/&quot;62-Psu3r0I1RtWvipMsnje4R4c3EqQ&quot;</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Via: 1.1 google</span><br><span class="line">Cf-Cache-Status: DYNAMIC</span><br><span class="line">Cf-Request-Id: 09f6202db000004ae6c5a60000000001</span><br><span class="line">Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;</span><br><span class="line">Report-To: &#123;&quot;endpoints&quot;:[&#123;&quot;url&quot;:&quot;https:\/\/a.nel.cloudflare.com\/report?s=WDZCmPIVBqPrVD05F5RqOiX74KykdTJ7WtAttSKScS439NAfEhz34z63qWUzQU0jZCdY3cwvA3nsVH%2BZ8QCtuSYfqsGPJdYhYRB6f9A%3D&quot;&#125;],&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800&#125;</span><br><span class="line">Nel: &#123;&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800&#125;</span><br><span class="line">Server: cloudflare</span><br><span class="line">Cf-Ray: 64d0695c49ad4ae6-HYD</span><br><span class="line">Alt-Svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400</span><br><span class="line"></span><br><span class="line">&#123;&quot;status&quot;:&quot;health&quot;,&quot;longStatus&quot;:&quot;Healthy. All routes are functioning properly.&quot;,&quot;version&quot;:&quot;1.0.0&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Not much information available here. You will notice a get parameter verbose with no value in the request. If you have used sqlmap or such tools you would notice verbosity usually ranges from 1 to n depending on the tool. So lets try providing 1 as value for the verbose parameter.</p>
+<p>Request:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">GET /api/status?verbose=1 HTTP/2</span><br><span class="line">Host: space.sdc.tf</span><br><span class="line">Cookie: __cfduid=d78c68cc9fdea32fb380f38f0ab1825a21620452158</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-US,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Referer: https://space.sdc.tf/</span><br><span class="line">Te: trailers</span><br><span class="line">Connection: close</span><br></pre></td></tr></table></figure>
+<p>Response:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">HTTP/2 200 OK</span><br><span class="line">Date: Sat, 08 May 2021 06:08:53 GMT</span><br><span class="line">Content-Type: application/json; charset=utf-8</span><br><span class="line">Etag: W/&quot;e3-jMu7i7AkcsLoz7i0SVBQzLxLr4I&quot;</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Via: 1.1 google</span><br><span class="line">Cf-Cache-Status: DYNAMIC</span><br><span class="line">Cf-Request-Id: 09ec30e10100002e779a2f6000000001</span><br><span class="line">Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;</span><br><span class="line">Report-To: &#123;&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800,&quot;endpoints&quot;:[&#123;&quot;url&quot;:&quot;https:\/\/a.nel.cloudflare.com\/report?s=MJvYv4dKRoKmfL5Jv%2Fx%2B0QhcW5XFEffkA9JYcDYdVF4bdgi8cPDgqEb5Rng4OxAg4myNma5%2BPgzeK0TnSqtb8XNy%2FhwNaPKwzZZIAds%3D&quot;&#125;]&#125;</span><br><span class="line">Nel: &#123;&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800&#125;</span><br><span class="line">Server: cloudflare</span><br><span class="line">Cf-Ray: 64c08414cb452e77-BOM</span><br><span class="line">Alt-Svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">   &quot;status&quot;:&quot;health&quot;,</span><br><span class="line">   &quot;longStatus&quot;:&quot;Healthy. All routes are functioning properly.&quot;,</span><br><span class="line">   &quot;version&quot;:&quot;1.0.0&quot;,</span><br><span class="line">   &quot;routes&quot;:[</span><br><span class="line">      &#123;</span><br><span class="line">     &quot;path&quot;:&quot;/status&quot;,</span><br><span class="line">     &quot;status&quot;:&quot;healthy&quot;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">     &quot;path&quot;:&quot;/rocketLaunch&quot;,</span><br><span class="line">     &quot;status&quot;:&quot;healthy&quot;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">     &quot;path&quot;:&quot;/fuel&quot;,</span><br><span class="line">     &quot;status&quot;:&quot;healthy&quot;</span><br><span class="line">      &#125;</span><br><span class="line">   ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Now we see a lot more information available to us, which includes 2 new endpoints - &#x2F;rocketLaunch and &#x2F;fuel. Lets query the &#x2F;rocketLaunch endpoint.</p>
+<p>Request:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">GET /api/rocketLaunch HTTP/2</span><br><span class="line">Host: space.sdc.tf</span><br><span class="line">Cookie: __cfduid=d78c68cc9fdea32fb380f38f0ab1825a21620452158</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-US,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Referer: https://space.sdc.tf/</span><br><span class="line">Te: trailers</span><br><span class="line">Connection: close</span><br></pre></td></tr></table></figure>
+<p>Response:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">HTTP/2 400 Bad Request</span><br><span class="line">Date: Sat, 08 May 2021 05:39:30 GMT</span><br><span class="line">Content-Length: 25</span><br><span class="line">Etag: &quot;19-SVOfstlPsXCdH4leAIVRqoZbYqg&quot;</span><br><span class="line">Via: 1.1 google</span><br><span class="line">Cf-Cache-Status: DYNAMIC</span><br><span class="line">Cf-Request-Id: 09ec16012700004ada98104000000001</span><br><span class="line">Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;</span><br><span class="line">Report-To: &#123;&quot;max_age&quot;:604800,&quot;group&quot;:&quot;cf-nel&quot;,&quot;endpoints&quot;:[&#123;&quot;url&quot;:&quot;https:\/\/a.nel.cloudflare.com\/report?s=hI2Bwnxp19DS3Ab9SnIWpCZJ9s1wgOZhERFWg5VMdLFlDLH4R57JOb7MncfLZN3px%2Bb%2BDUX%2FMvK%2FU73NPDhWIt7hls1WGzFSbf%2BDqDI%3D&quot;&#125;]&#125;</span><br><span class="line">Nel: &#123;&quot;max_age&quot;:604800,&quot;report_to&quot;:&quot;cf-nel&quot;&#125;</span><br><span class="line">Server: cloudflare</span><br><span class="line">Cf-Ray: 64c0591508c54ada-HYD</span><br><span class="line">Alt-Svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400</span><br><span class="line"></span><br><span class="line">request body must be json</span><br></pre></td></tr></table></figure>
+
+<p>We get an error suggesting that the request body must be json. So lets go ahead and do that. From here on the challenge is all about troubleshooting based on the errors we get. We add Content-Type: application&#x2F;json and a json body to the request as well as making it a POST request since it requires a request body.</p>
+<p>Request:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">POST /api/rocketLaunch HTTP/2</span><br><span class="line">Host: space.sdc.tf</span><br><span class="line">Cookie: __cfduid=d78c68cc9fdea32fb380f38f0ab1825a21620452158</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-US,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Referer: https://space.sdc.tf/</span><br><span class="line">Te: trailers</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 9</span><br><span class="line"></span><br><span class="line">&#123;&quot;x&quot;:&quot;y&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>Response:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">```</span><br><span class="line">HTTP/2 400 Bad Request</span><br><span class="line">Date: Sat, 08 May 2021 05:42:51 GMT</span><br><span class="line">Content-Length: 20</span><br><span class="line">Etag: &quot;14-TBPT3N4WkgaLR8mc0RAXcU26ZAM&quot;</span><br><span class="line">Via: 1.1 google</span><br><span class="line">Cf-Cache-Status: DYNAMIC</span><br><span class="line">Cf-Request-Id: 09ec1911d300004aed96084000000001</span><br><span class="line">Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;</span><br><span class="line">Report-To: &#123;&quot;group&quot;:&quot;cf-nel&quot;,&quot;endpoints&quot;:[&#123;&quot;url&quot;:&quot;https:\/\/a.nel.cloudflare.com\/report?s=VqP%2FgdJ1wT7IEcEOMkYveux7cy%2F0pihioWDUg%2FO3ifwNRmyxT4gxi8vGEKSTRU8iwExg5mVjVqVOU2yIUwrP%2FSVaUXgVnNx99bDnEHA%3D&quot;&#125;],&quot;max_age&quot;:604800&#125;</span><br><span class="line">Nel: &#123;&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800&#125;</span><br><span class="line">Server: cloudflare</span><br><span class="line">Cf-Ray: 64c05dfc8c304aed-HYD</span><br><span class="line">Alt-Svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400</span><br><span class="line"></span><br><span class="line">rocket not specified</span><br></pre></td></tr></table></figure>
+
+<p>We get another error asking us to add a rocket. So lets do that.</p>
+<p>Request:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">POST /api/rocketLaunch HTTP/2</span><br><span class="line">Host: space.sdc.tf</span><br><span class="line">Cookie: __cfduid=d78c68cc9fdea32fb380f38f0ab1825a21620452158</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-US,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Referer: https://space.sdc.tf/</span><br><span class="line">Te: trailers</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 14</span><br><span class="line"></span><br><span class="line">&#123;&quot;rocket&quot;:&quot;y&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Response:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">HTTP/2 400 Bad Request</span><br><span class="line">Date: Sat, 08 May 2021 05:43:02 GMT</span><br><span class="line">Content-Length: 41</span><br><span class="line">Etag: &quot;29-IJrJmM4FBfsLZi5Mi6TsnwYBLdY&quot;</span><br><span class="line">Via: 1.1 google</span><br><span class="line">Cf-Cache-Status: DYNAMIC</span><br><span class="line">Cf-Request-Id: 09ec193a8700004aed7433d000000001</span><br><span class="line">Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;</span><br><span class="line">Report-To: &#123;&quot;group&quot;:&quot;cf-nel&quot;,&quot;endpoints&quot;:[&#123;&quot;url&quot;:&quot;https:\/\/a.nel.cloudflare.com\/report?s=PcLh8HANUGlbAHr1kaVAUzvAv2qT0yCg5VMOY%2BFo39sa%2F7klwj3ss%2FttQBSyCE8%2BrXkWcXf4nvCt4J8OeyHE6ffQCU3k%2BBjSyJgPcMo%3D&quot;&#125;],&quot;max_age&quot;:604800&#125;</span><br><span class="line">Nel: &#123;&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800&#125;</span><br><span class="line">Server: cloudflare</span><br><span class="line">Cf-Ray: 64c05e3dab4f4aed-HYD</span><br><span class="line">Alt-Svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400</span><br><span class="line"></span><br><span class="line">rocket not recognized (available: triton)</span><br></pre></td></tr></table></figure>
+
+<p>Since the rocket name is not correct, the error provides us with the name which we can use.</p>
+<p>Request:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">POST /api/rocketLaunch HTTP/2</span><br><span class="line">Host: space.sdc.tf</span><br><span class="line">Cookie: __cfduid=d78c68cc9fdea32fb380f38f0ab1825a21620452158</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-US,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Referer: https://space.sdc.tf/</span><br><span class="line">Te: trailers</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 19</span><br><span class="line"></span><br><span class="line">&#123;&quot;rocket&quot;:&quot;triton&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Response:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">HTTP/2 400 Bad Request</span><br><span class="line">Date: Sat, 08 May 2021 05:43:11 GMT</span><br><span class="line">Content-Length: 24</span><br><span class="line">Etag: &quot;18-4SZ7qR96LADOnmIcaDt9Ocnl2bE&quot;</span><br><span class="line">Via: 1.1 google</span><br><span class="line">Cf-Cache-Status: DYNAMIC</span><br><span class="line">Cf-Request-Id: 09ec195ebc00004aed5485e000000001</span><br><span class="line">Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;</span><br><span class="line">Report-To: &#123;&quot;group&quot;:&quot;cf-nel&quot;,&quot;endpoints&quot;:[&#123;&quot;url&quot;:&quot;https:\/\/a.nel.cloudflare.com\/report?s=jCFFlnfNbKeXYqFkEYm6CQrgxeyYH9sdDK8yk9NRI4eQYF0cgQLJsGVAWP417GFmaWoGSyKdBKgggJZokHLUNZZz2sDwYYAg9WW8KyA%3D&quot;&#125;],&quot;max_age&quot;:604800&#125;</span><br><span class="line">Nel: &#123;&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800&#125;</span><br><span class="line">Server: cloudflare</span><br><span class="line">Cf-Ray: 64c05e77993c4aed-HYD</span><br><span class="line">Alt-Svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400</span><br><span class="line"></span><br><span class="line">launchTime not specified</span><br></pre></td></tr></table></figure>
+
+<p>Further error wants us to specify the launch time. After resolving few more errors such as launchTime not in hh:mm format and launchTime unapproved I was able to get a proper request going. Launch time is noon based on the challenge description. Any other time would result in unapproved error. We could have also tried the server date&#x2F;time based on the response to see if it works if 12:00 was not working.</p>
+<p>Request:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">POST /api/rocketLaunch HTTP/2</span><br><span class="line">Host: space.sdc.tf</span><br><span class="line">Cookie: __cfduid=d78c68cc9fdea32fb380f38f0ab1825a21620452158</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-US,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Referer: https://space.sdc.tf/</span><br><span class="line">Te: trailers</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 40</span><br><span class="line"></span><br><span class="line">&#123;&quot;rocket&quot;:&quot;triton&quot;,&quot;launchTime&quot;:&quot;12:00&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Response:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">HTTP/2 400 Bad Request</span><br><span class="line">Date: Sat, 08 May 2021 05:45:43 GMT</span><br><span class="line">Content-Length: 25</span><br><span class="line">Etag: &quot;19-mztLDY8Mq3B5NlRcCCz93/AW9/E&quot;</span><br><span class="line">Via: 1.1 google</span><br><span class="line">Cf-Cache-Status: DYNAMIC</span><br><span class="line">Cf-Request-Id: 09ec1bb20200004b0a94a2f000000001</span><br><span class="line">Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;</span><br><span class="line">Report-To: &#123;&quot;endpoints&quot;:[&#123;&quot;url&quot;:&quot;https:\/\/a.nel.cloudflare.com\/report?s=vNRmX6pCeEMNbFdJFpBoha38myORB9sQFmLzXc%2FZpdhCQdYvYemzzkWTD2bYyZs3XCHAbShDYco72bq65PpQnXmHMzmKrPA79pUBmMk%3D&quot;&#125;],&quot;max_age&quot;:604800,&quot;group&quot;:&quot;cf-nel&quot;&#125;</span><br><span class="line">Nel: &#123;&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800&#125;</span><br><span class="line">Server: cloudflare</span><br><span class="line">Cf-Ray: 64c0623009ce4b0a-HYD</span><br><span class="line">Alt-Svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400</span><br><span class="line"></span><br><span class="line">fuel pumpID not specified</span><br></pre></td></tr></table></figure>
+
+<p>We now have to add pumpID value. We can get it by querying the &#x2F;fuel endpoint or bruteforce the numerical value in this request. After trying available pumpIDs we get the one that works.</p>
+<p>Request:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">POST /api/rocketLaunch HTTP/2</span><br><span class="line">Host: space.sdc.tf</span><br><span class="line">Cookie: __cfduid=d78c68cc9fdea32fb380f38f0ab1825a21620452158</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-US,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Referer: https://space.sdc.tf/</span><br><span class="line">Te: trailers</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 51</span><br><span class="line"></span><br><span class="line">&#123;&quot;rocket&quot;:&quot;triton&quot;,&quot;launchTime&quot;:&quot;12:00&quot;,&quot;pumpID&quot;:4&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Response:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">HTTP/2 400 Bad Request</span><br><span class="line">Date: Sat, 08 May 2021 05:47:00 GMT</span><br><span class="line">Content-Length: 42</span><br><span class="line">Etag: &quot;2a-v5ExyC0zETE7PzLwSkFsUIYG9H0&quot;</span><br><span class="line">Via: 1.1 google</span><br><span class="line">Cf-Cache-Status: DYNAMIC</span><br><span class="line">Cf-Request-Id: 09ec1cddd000004af8321a7000000001</span><br><span class="line">Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;</span><br><span class="line">Report-To: &#123;&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800,&quot;endpoints&quot;:[&#123;&quot;url&quot;:&quot;https:\/\/a.nel.cloudflare.com\/report?s=WYVsqRAJnviX%2FFIDgpJ0rK2EM9%2B%2Fjx6XFpN80Xc91zn6gWjEoL2y3sDIph3zLWiLPuMO0fy3NOs4xW0LUrflB%2BtyVL13ISK1N0cJ4Eg%3D&quot;&#125;]&#125;</span><br><span class="line">Nel: &#123;&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800&#125;</span><br><span class="line">Server: cloudflare</span><br><span class="line">Cf-Ray: 64c0640fbda44af8-HYD</span><br><span class="line">Alt-Svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400</span><br><span class="line"></span><br><span class="line">frontend authorization token not specified</span><br></pre></td></tr></table></figure>
+
+<p>Its now asking for a authorization token. So I went ahead and searched for token in the burp history. All the js files had a token as below</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Token:&quot;yiLYDykacWp9sgPMluQeKkANeRFXyU3ZuxBrj2BQ&quot;</span><br></pre></td></tr></table></figure>
+
+<p>This is where I was stuck a bit and started thinking too much. I am used to dealing with auth tokens in request headers, hence I tried to add this token as a header. I tried various auth related headers and a few combinations of them but nothing worked. Than I took a step back and tried to approach it in a different way and thought of trying to add token as another json value with others and that worked resulting in below request and the flag.</p>
+<p>Request</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">POST /api/rocketLaunch HTTP/2</span><br><span class="line">Host: space.sdc.tf</span><br><span class="line">Cookie: __cfduid=d78c68cc9fdea32fb380f38f0ab1825a21620452158</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en-US,en;q=0.5</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">Referer: https://space.sdc.tf/</span><br><span class="line">Te: trailers</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Content-Length: 106</span><br><span class="line"></span><br><span class="line">&#123;&quot;rocket&quot;:&quot;triton&quot;,&quot;launchTime&quot;:&quot;12:00&quot;,&quot;pumpID&quot;:4,&quot;token&quot;:&quot;yiLYDykacWp9sgPMluQeKkANeRFXyU3ZuxBrj2BQ&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Response:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">HTTP/2 200 OK</span><br><span class="line">Date: Sat, 08 May 2021 06:45:30 GMT</span><br><span class="line">Content-Length: 50</span><br><span class="line">Etag: &quot;32-UMBTLpu/GF1MEJ81AK5sO97tnRU&quot;</span><br><span class="line">Via: 1.1 google</span><br><span class="line">Cf-Cache-Status: DYNAMIC</span><br><span class="line">Cf-Request-Id: 09ec526b3d0000d5932c28a000000001</span><br><span class="line">Expect-Ct: max-age=604800, report-uri=&quot;https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct&quot;</span><br><span class="line">Report-To: &#123;&quot;group&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800,&quot;endpoints&quot;:[&#123;&quot;url&quot;:&quot;https:\/\/a.nel.cloudflare.com\/report?s=Jf%2FOq5YiSaNHAG2nlYIxuXFPaaVftdWL0hK0QPfslFb98eji0%2BTuaT1S0%2FY2688hypXl6dZqHRMOUoWxuY4Fh%2B%2BWzAVQjxS1%2FmiTLXA%3D&quot;&#125;]&#125;</span><br><span class="line">Nel: &#123;&quot;report_to&quot;:&quot;cf-nel&quot;,&quot;max_age&quot;:604800&#125;</span><br><span class="line">Server: cloudflare</span><br><span class="line">Cf-Ray: 64c0b9bec975d593-BOM</span><br><span class="line">Alt-Svc: h3-27=&quot;:443&quot;; ma=86400, h3-28=&quot;:443&quot;; ma=86400, h3-29=&quot;:443&quot;; ma=86400</span><br><span class="line"></span><br><span class="line">rocket launched. sdctf&#123;0ne_sM@lL_sT3p_f0R_h@ck3r$&#125;</span><br></pre></td></tr></table></figure>
+
+<p>This was how I approached the problem and solved it. Feel free to ping me on twitter for feedback or queries.</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Archive</a></li>
+        
+          <li><a href="/tags/">Tags</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&text=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&is_video=false&description=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Solving Apollo 1337 from San Diego CTF 2021&body=Check out this article: http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&title=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&name=Solving Apollo 1337 from San Diego CTF 2021&description=CTF challenge all based on enumeration and troubleshooting."><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://securitytaters.github.io/solving-apollo-1337-from-san-diego-ctf-2021/&t=Solving Apollo 1337 from San Diego CTF 2021"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    0xm4v3rick
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Archive</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

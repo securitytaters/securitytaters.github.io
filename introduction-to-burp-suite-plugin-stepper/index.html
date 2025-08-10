@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Small introduction to burp suite plugin stepper and how it can be used to speed up the testing.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Introduction to Burp Suite Plugin Stepper">
+<meta property="og:url" content="http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/">
+<meta property="og:site_name" content="securitytaters">
+<meta property="og:description" content="Small introduction to burp suite plugin stepper and how it can be used to speed up the testing.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/4.1.jpg">
+<meta property="og:image" content="http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/4.2.jpg">
+<meta property="og:image" content="http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/4.3.jpg">
+<meta property="article:published_time" content="2020-02-17T04:30:00.000Z">
+<meta property="article:modified_time" content="2025-08-10T09:24:05.904Z">
+<meta property="article:author" content="0xm4v3rick">
+<meta property="article:tag" content="webappsec">
+<meta property="article:tag" content="burp suite">
+<meta property="article:tag" content="repeater">
+<meta property="article:tag" content="stepper">
+<meta property="article:tag" content="plugin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/4.1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Introduction to Burp Suite Plugin Stepper</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Archive</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/solving-spooky-store-from-utctf-2020/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/solving-my-bank-from-hacktm-ctf-quals-2020/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&text=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&is_video=false&description=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Introduction to Burp Suite Plugin Stepper&body=Check out this article: http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&name=Introduction to Burp Suite Plugin Stepper&description=Small introduction to burp suite plugin stepper and how it can be used to speed up the testing."><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&t=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Introduction to Burp Suite Plugin Stepper
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+	<p>Author : 
+        <span class="p-name" itemprop="name">0xm4v3rick</span>
+	</p>
+      </span>
+      
+    <div class="postdate">
+      
+        Created: <time datetime="2020-02-17T04:30:00.000Z" class="dt-published" itemprop="datePublished">17-02-2020</time>
+        
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/tools/">tools</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/burp-suite/" rel="tag">burp suite</a>, <a class="p-category" href="/tags/plugin/" rel="tag">plugin</a>, <a class="p-category" href="/tags/repeater/" rel="tag">repeater</a>, <a class="p-category" href="/tags/stepper/" rel="tag">stepper</a>, <a class="p-category" href="/tags/webappsec/" rel="tag">webappsec</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>While trying to solve a CTF challenge I was in a situation where I needed to do multiple steps inorder to test the challenge. Although I wasn’t able to solve the challenge I learned a few things along the way while trying out stepper for the first time. So here is small intro on how stepper can be used in such cases. This is pretty biginner level stuff. May help someone struggling to get started with it. The plugin is available <a target="_blank" rel="noopener" href="https://github.com/CoreyD97/Stepper">here</a> or can be downloaded from the BApp Store.</p>
+<p>Let’s get started with the challenge scenario. Below POST request returned a hash value as shown in response. The hash value was needed to be included in the next request to validate the SMS.</p>
+<p>Request1:</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/api/admin.restore</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>sherlock-message.ru</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en-US,en;q=0.5</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">X-Requested-With</span><span class="punctuation">: </span>XMLHttpRequest</span><br><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>http://sherlock-message.ru</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Referer</span><span class="punctuation">: </span>http://sherlock-message.ru/admin</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>0</span><br></pre></td></tr></table></figure>
+
+<p>Response1:</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">HTTP/1.1</span> <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">Server</span><span class="punctuation">: </span>nginx</span><br><span class="line"><span class="attribute">Date</span><span class="punctuation">: </span>Sun, 16 Feb 2020 09:32:39 GMT</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>text/html; charset=UTF-8</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>95</span><br><span class="line"></span><br><span class="line"><span class="language-json"><span class="punctuation">&#123;</span><span class="attr">&quot;status&quot;</span><span class="punctuation">:</span><span class="string">&quot;success&quot;</span><span class="punctuation">,</span><span class="attr">&quot;response&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span><span class="attr">&quot;need_sms&quot;</span><span class="punctuation">:</span><span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span><span class="attr">&quot;new_hash&quot;</span><span class="punctuation">:</span><span class="string">&quot;0e2eafbefa3343f7dd43fa34e58e8d8b&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>SMS validation request is as below. Uses hash value from previous request(above) along with the sms code.<br>Request2:</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/api/admin.restore</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>sherlock-message.ru</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en-US,en;q=0.5</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded; charset=UTF-8</span><br><span class="line"><span class="attribute">X-Requested-With</span><span class="punctuation">: </span>XMLHttpRequest</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>51</span><br><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>http://sherlock-message.ru</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Referer</span><span class="punctuation">: </span>http://sherlock-message.ru/admin</span><br><span class="line"></span><br><span class="line"><span class="language-apache"><span class="attribute">hash</span>=<span class="number">0</span>e2eafbefa3343f7dd43fa34e58e8d8b&amp;sms_code=<span class="number">123456</span></span></span><br></pre></td></tr></table></figure>
+
+<p>Response2:</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">HTTP/1.1</span> <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">Server</span><span class="punctuation">: </span>nginx</span><br><span class="line"><span class="attribute">Date</span><span class="punctuation">: </span>Sun, 16 Feb 2020 09:32:39 GMT</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>text/html; charset=UTF-8</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>95</span><br><span class="line"></span><br><span class="line"><span class="language-json"><span class="punctuation">&#123;</span><span class="attr">&quot;status&quot;</span><span class="punctuation">:</span><span class="string">&quot;success&quot;</span><span class="punctuation">,</span><span class="attr">&quot;response&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span><span class="attr">&quot;need_sms&quot;</span><span class="punctuation">:</span><span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span><span class="attr">&quot;new_hash&quot;</span><span class="punctuation">:</span><span class="string">&quot;5c608733c8545b4633cc31a400959e03&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>As we can see a new token is returned in the above response. The old one expires and gives error if used again. In order to test the validation request, the new token is required to be used in the next SMS validation request. The hash acts like a anti-CSRF token here. So repeating first request, than copying the hash&#x2F;token and using it in second request becomes a lot of tedious work using just the repeater. This is where stepper comes in and does a lot of heavy lifting. Let’s see how it can be used.</p>
+<p>We send the first request to the stepper and use a regex to capture the token&#x2F;hash from response. Create a variable using Add Variable for that, random variable name will be created.</p>
+<p>Tip: Variables can be renamed by double clicking the Identifier.<br><img src="/introduction-to-burp-suite-plugin-stepper/4.1.jpg" alt="alt"><br>Let’s understand how the follwoing regex is used. Regex:  (?:”new_hash”:”)(.*?)(?:”)</p>
+<p>First group of the regex (?:”new_hash”:”) is non-capturing, proves as a starting point for the string and checks occurrence of “new_hash”:”</p>
+<p>Second group (.*?) which is capturing group, will collect everything after the first group untill the third group is found.</p>
+<p>Third group (?:”) again a non capturing group to mark end of collection and it checks for “</p>
+<p>More explanation can be found by inserting the above regex <a target="_blank" rel="noopener" href="https://regexr.com/">here</a></p>
+<p>Now the captured hash is stored in hash variable. These variables can be accessed using the syntax $VAR:VARIABLE_IDENTIFIER$ or $var:VARIABLE_IDENTIFIER$.</p>
+<p>We forward the second request to stpper now and use the previously collected hash here using $VAR:hash$. Now we can Execute Sequence and second step should take the hash from first step and use it. Execute Sequence executes all the steps mentioned there from Step 1 to Step 2 to … Step N in that order.</p>
+<p><img src="/introduction-to-burp-suite-plugin-stepper/4.2.jpg" alt="alt"></p>
+<p>Let’s check the Stepper Replacement tab as below and we should see the variable being replaced by the actual value. Alternatively another plugin such as logger++ or flow can also be used to check that variables are replaced as required. </p>
+<p>Note: Hash value varies here because I took the screenshot later on.</p>
+<p><img src="/introduction-to-burp-suite-plugin-stepper/4.3.jpg" alt="alt"></p>
+<p>Now insert your payloads and start testing the same away as repeater. A sample request with a payload would look something like below. Insert your payloads and hit Execute Sequence and it should work smoothly.</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/api/admin.restore</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>sherlock-message.ru</span><br><span class="line"><span class="attribute">User-Agent</span><span class="punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0</span><br><span class="line"><span class="attribute">Accept</span><span class="punctuation">: </span>*/*</span><br><span class="line"><span class="attribute">Accept-Language</span><span class="punctuation">: </span>en-US,en;q=0.5</span><br><span class="line"><span class="attribute">Accept-Encoding</span><span class="punctuation">: </span>gzip, deflate</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/x-www-form-urlencoded; charset=UTF-8</span><br><span class="line"><span class="attribute">X-Requested-With</span><span class="punctuation">: </span>XMLHttpRequest</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>51</span><br><span class="line"><span class="attribute">Origin</span><span class="punctuation">: </span>http://sherlock-message.ru</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>close</span><br><span class="line"><span class="attribute">Referer</span><span class="punctuation">: </span>http://sherlock-message.ru/admin</span><br><span class="line"></span><br><span class="line"><span class="language-arcade"><span class="built_in">hash</span>=$<span class="keyword">VAR</span>:<span class="built_in">hash</span>$&amp;sms_code=<span class="number">1</span><span class="string">&#x27;--</span></span></span><br></pre></td></tr></table></figure>
+
+<p>We can also use the same variable again anywhere in the request. An example of this would be something like below.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hash=$VAR:hash$&amp;sms_code=$VAR:hash$</span><br></pre></td></tr></table></figure>
+
+<p>That’s it. Effective way to use the stepper and continue the testing on the request without tedious back and forth between multiple request using multiple values. Feel free to ping me on twitter for any feedback or queries. I will try to help as much as I can.</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Archive</a></li>
+        
+          <li><a href="/tags/">Tags</a></li>
+        
+          <li><a href="/categories/">Categories</a></li>
+        
+          <li><a href="/search/">Search</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&text=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&is_video=false&description=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Introduction to Burp Suite Plugin Stepper&body=Check out this article: http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&title=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&name=Introduction to Burp Suite Plugin Stepper&description=Small introduction to burp suite plugin stepper and how it can be used to speed up the testing."><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://securitytaters.github.io/introduction-to-burp-suite-plugin-stepper/&t=Introduction to Burp Suite Plugin Stepper"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2018-2025
+    0xm4v3rick
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Archive</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Categories</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/securitytaters">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
