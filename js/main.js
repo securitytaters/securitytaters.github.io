@@ -55,11 +55,14 @@ $(document).ready(function() {
      * Add a scroll listener to the menu to hide/show the navigation links.
      */
     if (menu.length) {
+      var lastScrollTop = 0;
       $(window).on("scroll", function() {
         var topDistance = menu.offset().top;
+        var currentScrollTop = $(window).scrollTop();
 
         // hide only the navigation links on desktop
-        if (!nav.is(":visible") && topDistance < 50) {
+        // Show nav only when near the top of the page
+        if (!nav.is(":visible") && topDistance < 80) {
           nav.show();
         } else if (nav.is(":visible") && topDistance > 100) {
           nav.hide();
@@ -67,13 +70,15 @@ $(document).ready(function() {
 
         // on tablet, hide the navigation icon as well and show a "scroll to top
         // icon" instead
-        if ( ! $( "#menu-icon" ).is(":visible") && topDistance < 50 ) {
+        if ( ! $( "#menu-icon" ).is(":visible") && topDistance < 80 ) {
           $("#menu-icon-tablet").show();
           $("#top-icon-tablet").hide();
         } else if (! $( "#menu-icon" ).is(":visible") && topDistance > 100) {
           $("#menu-icon-tablet").hide();
           $("#top-icon-tablet").show();
         }
+
+        lastScrollTop = currentScrollTop;
       });
     }
 

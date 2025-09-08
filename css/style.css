@@ -493,13 +493,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
 }
 .content p {
-  hyphens: auto;
-  -moz-hyphens: auto;
-  -ms-hyphens: auto;
-  -webkit-hyphens: auto;
+  hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  -webkit-hyphens: none;
 }
 .content code {
   hyphens: manual;
@@ -1101,7 +1101,7 @@ body {
   }
   .post-list .post-item span {
     flex: 1 1 auto;
-    line-height: 1;
+    line-height: 1.7;
   }
   .post-list .post-item .post-excerpt {
     flex: 1 1 100%;
@@ -1649,7 +1649,7 @@ code {
 .highlight {
   overflow-x: auto;
   margin: 1rem 0;
-  padding: 10px 15px;
+  padding: 10px 15px 10px 15px;
   border-radius: 4px;
   background: #212326;
   font-family: "Fira Code", monospace;
@@ -1696,7 +1696,7 @@ code {
 }
 .highlight pre {
   margin: 0;
-  padding: 0;
+  padding: 0 0 20px 0;
   border: none;
   background: none;
 }
@@ -1717,6 +1717,7 @@ code {
 .post-item {
   display: flex;
   align-items: baseline;
+  gap: 0.25rem;
 }
 .post-item .meta {
   flex-shrink: 0;
@@ -1725,9 +1726,9 @@ code {
   flex: 1;
 }
 .post-item .meta + span .posttitle {
-  word-wrap: break-word;
-  hyphens: auto;
-  -moz-hyphens: auto;
-  -ms-hyphens: auto;
-  -webkit-hyphens: auto;
+  word-wrap: normal;
+  hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  -webkit-hyphens: none;
 }
