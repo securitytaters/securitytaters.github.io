@@ -1101,7 +1101,7 @@ body {
   }
   .post-list .post-item span {
     flex: 1 1 auto;
-    line-height: 1.7;
+    line-height: inherit;
   }
   .post-list .post-item .post-excerpt {
     flex: 1 1 100%;
