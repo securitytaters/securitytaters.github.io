@@ -57,23 +57,24 @@ $(document).ready(function() {
     if (menu.length) {
       var lastScrollTop = 0;
       $(window).on("scroll", function() {
-        var topDistance = menu.offset().top;
         var currentScrollTop = $(window).scrollTop();
+        var isScrollingUp = currentScrollTop < lastScrollTop;
+        var isScrollingDown = currentScrollTop > lastScrollTop;
 
         // hide only the navigation links on desktop
-        // Show nav only when near the top of the page
-        if (!nav.is(":visible") && topDistance < 80) {
+        // Show nav when scrolling up and near top, or when at very top
+        if (!nav.is(":visible") && (currentScrollTop < 80 || (isScrollingUp && currentScrollTop < 200))) {
           nav.show();
-        } else if (nav.is(":visible") && topDistance > 100) {
+        } else if (nav.is(":visible") && isScrollingDown && currentScrollTop > 100) {
           nav.hide();
         }
 
         // on tablet, hide the navigation icon as well and show a "scroll to top
         // icon" instead
-        if ( ! $( "#menu-icon" ).is(":visible") && topDistance < 80 ) {
+        if ( ! $( "#menu-icon" ).is(":visible") && (currentScrollTop < 80 || (isScrollingUp && currentScrollTop < 200)) ) {
           $("#menu-icon-tablet").show();
           $("#top-icon-tablet").hide();
-        } else if (! $( "#menu-icon" ).is(":visible") && topDistance > 100) {
+        } else if (! $( "#menu-icon" ).is(":visible") && isScrollingDown && currentScrollTop > 100) {
           $("#menu-icon-tablet").hide();
           $("#top-icon-tablet").show();
         }
